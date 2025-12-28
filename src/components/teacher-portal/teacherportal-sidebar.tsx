@@ -42,7 +42,6 @@ export default function TeacherPortalSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
 
-  // ✅ Load teacherId safely on client
   useEffect(() => {
     const id = localStorage.getItem("teacherId");
     setTeacherId(id);
@@ -60,8 +59,8 @@ export default function TeacherPortalSidebar() {
       icon: LayoutDashboard,
     },
     {
-      title: "Attendence",
-      href: "/teacherportal/attendence",
+      title: "Attendance",
+      href: `/teacherportal/attendence/${teacherId}`,
       icon: BookOpen,
     },
     {
@@ -71,7 +70,7 @@ export default function TeacherPortalSidebar() {
     },
     teacherId && {
       title: "Classes",
-      href:  `/teacherportal/teacherclass/${teacherId}`,
+      href: `/teacherportal/teacherclass/${teacherId}`,
       icon: BookOpen,
     },
     {
@@ -111,7 +110,7 @@ export default function TeacherPortalSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-sky-500 text-white transition-all",
+          "fixed left-0 top-0 z-40 h-screen bg-sky-500 text-white transition-all flex flex-col",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
           isCollapsed ? "md:w-16" : "md:w-64"
@@ -119,7 +118,7 @@ export default function TeacherPortalSidebar() {
       >
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-white/20 px-4">
-          <span className="font-bold">Teacher Portal</span>
+          {!isCollapsed && <span className="font-bold">Teacher Portal</span>}
           <Button
             variant="ghost"
             size="icon"
@@ -155,8 +154,8 @@ export default function TeacherPortalSidebar() {
 
         <Separator className="bg-white/20" />
 
-        {/* Profile */}
-        <div className="p-4">
+        {/* Profile (STICKS TO BOTTOM) */}
+        <div className="mt-auto p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="w-full justify-start gap-3">
@@ -164,6 +163,7 @@ export default function TeacherPortalSidebar() {
                   <AvatarImage />
                   <AvatarFallback>TP</AvatarFallback>
                 </Avatar>
+
                 {!isCollapsed && (
                   <>
                     <div className="flex flex-col text-sm">
