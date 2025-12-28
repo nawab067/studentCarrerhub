@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { BookOpen, Users, X } from "lucide-react";
+import { BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Interface
@@ -25,7 +25,6 @@ export default function TeacherClassesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [showModal, setShowModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState<AssignedClass | null>(null);
   const [attendance, setAttendance] = useState<AttendanceState>({});
 
@@ -60,23 +59,21 @@ export default function TeacherClassesPage() {
     fetchClasses();
   }, [teacherId]);
 
-  // Open modal
-  const handleOpenModal = (cls: AssignedClass) => {
+  // Handle attendance view
+  const handleOpenAttendance = (cls: AssignedClass) => {
     setSelectedClass(cls);
 
-    // Initialize attendance state for each student
+    // Initialize attendance state
     const initialAttendance: AttendanceState = {};
-    cls.students.forEach(student => {
+    cls.students.forEach((student) => {
       initialAttendance[student] = null;
     });
     setAttendance(initialAttendance);
-
-    setShowModal(true);
   };
 
   // Handle checkbox change
   const handleAttendanceChange = (studentId: string, value: "P" | "A") => {
-    setAttendance(prev => ({
+    setAttendance((prev) => ({
       ...prev,
       [studentId]: prev[studentId] === value ? null : value, // toggle
     }));
@@ -86,7 +83,7 @@ export default function TeacherClassesPage() {
   const handleSaveAttendance = () => {
     console.log("Attendance for class", selectedClass?._id, attendance);
     // TODO: Send POST request to backend
-    setShowModal(false);
+    alert("Attendance saved!"); // optional feedback
   };
 
   return (
@@ -101,6 +98,7 @@ export default function TeacherClassesPage() {
           <p className="text-gray-500">No classes assigned yet.</p>
         )}
 
+        {/* Classes Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {assignedClasses.map((cls) => (
             <Card key={cls._id} className="bg-sky-100 border-sky-300">
@@ -118,7 +116,7 @@ export default function TeacherClassesPage() {
 
                 <Button
                   className="w-full bg-sky-500 hover:bg-sky-600"
-                  onClick={() => handleOpenModal(cls)}
+                  onClick={() => handleOpenAttendance(cls)}
                 >
                   View Attendance
                 </Button>
@@ -127,54 +125,7 @@ export default function TeacherClassesPage() {
           ))}
         </div>
 
-        {/* Modal */}
-        {showModal && selectedClass && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-              <button
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowModal(false)}
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <h2 className="text-xl font-bold mb-4">{selectedClass.classroom_name} - Attendance</h2>
-
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {selectedClass.students.map((student) => (
-                  <div key={student} className="flex items-center justify-between border p-2 rounded">
-                    <span>{student}</span>
-                    <div className="flex gap-2">
-                      <label className="flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          checked={attendance[student] === "P"}
-                          onChange={() => handleAttendanceChange(student, "P")}
-                        />
-                        P
-                      </label>
-                      <label className="flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          checked={attendance[student] === "A"}
-                          onChange={() => handleAttendanceChange(student, "A")}
-                        />
-                        A
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Button
-                className="mt-4 w-full bg-sky-500 hover:bg-sky-600"
-                onClick={handleSaveAttendance}
-              >
-                Save
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Attendance Section */}
       </main>
     </div>
   );
