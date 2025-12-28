@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // <-- import router
 import axios from "axios";
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -20,6 +21,8 @@ interface AttendanceState {
 }
 
 export default function TeacherClassesPage() {
+  const router = useRouter(); // <-- initialize router
+
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [assignedClasses, setAssignedClasses] = useState<AssignedClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,31 +62,9 @@ export default function TeacherClassesPage() {
     fetchClasses();
   }, [teacherId]);
 
-  // Handle attendance view
+  // Navigate to attendance page
   const handleOpenAttendance = (cls: AssignedClass) => {
-    setSelectedClass(cls);
-
-    // Initialize attendance state
-    const initialAttendance: AttendanceState = {};
-    cls.students.forEach((student) => {
-      initialAttendance[student] = null;
-    });
-    setAttendance(initialAttendance);
-  };
-
-  // Handle checkbox change
-  const handleAttendanceChange = (studentId: string, value: "P" | "A") => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: prev[studentId] === value ? null : value, // toggle
-    }));
-  };
-
-  // Save attendance
-  const handleSaveAttendance = () => {
-    console.log("Attendance for class", selectedClass?._id, attendance);
-    // TODO: Send POST request to backend
-    alert("Attendance saved!"); // optional feedback
+    router.push(`/teacherportal/attendence/${cls._id}/AttendenceSheet`); // <-- navigate to dynamic attendance page
   };
 
   return (
@@ -98,7 +79,6 @@ export default function TeacherClassesPage() {
           <p className="text-gray-500">No classes assigned yet.</p>
         )}
 
-        {/* Classes Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {assignedClasses.map((cls) => (
             <Card key={cls._id} className="bg-sky-100 border-sky-300">
@@ -124,8 +104,6 @@ export default function TeacherClassesPage() {
             </Card>
           ))}
         </div>
-
-        {/* Attendance Section */}
       </main>
     </div>
   );
