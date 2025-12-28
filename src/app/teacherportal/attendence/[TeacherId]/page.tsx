@@ -64,7 +64,7 @@ export default function TeacherClassesPage() {
 
   // Navigate to attendance page
   const handleOpenAttendance = (cls: AssignedClass) => {
-    router.push(`/teacherportal/attendence/${cls._id}/AttendenceSheet`); // <-- navigate to dynamic attendance page
+    router.push(`/teacherportal/attendence/AttendenceSheet/${cls._id}`); // <-- navigate to dynamic attendance page
   };
 
   return (
