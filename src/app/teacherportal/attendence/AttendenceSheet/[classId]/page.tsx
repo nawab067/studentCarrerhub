@@ -22,7 +22,7 @@ interface Student {
 
 export default function AttendanceSheetPage() {
   const params = useParams();
-  const classroomId = params.teacherId; // your route param is the classroom ID
+  const classroomId = params.classId; // your route param is the classroom ID
 
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<AttendanceState>({});
