@@ -26,7 +26,7 @@ export default function LoginPage() {
 
       const user = response.data.user;
 
-      console.log("Login response user:", user);
+      console.log("Login response name:", user);
 
       if (!user) {
         alert("Invalid login credentials");
