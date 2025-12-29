@@ -1,71 +1,72 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { AssignedClass } from "@/app/teacherportal/attendence/[TeacherId]/page";
 
-// Attendance state type
-interface AttendanceState {
-  [studentId: string]: "P" | "A" | null;
-}
-
-// Student type
 interface Student {
   id: string;
   name: string;
 }
 
+interface AttendanceState {
+  [studentId: string]: "P" | "A" | null;
+}
+
+interface Classroom {
+  _id: string;
+  classroom_name: string;
+  students: {
+    _id: string;
+    name: string;
+  }[];
+}
+
 export default function AttendanceSheetPage() {
   const params = useParams();
-  const classroomId = params.classId; // your route param is the classroom ID
+  const classroomId = params.classId as string;
 
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<AttendanceState>({});
-  const [className, setClassName] = useState<AssignedClass | null>(null);
+  const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch students for this class
   useEffect(() => {
     if (!classroomId) return;
 
-    const fetchClassData = async () => {
+    const fetchStudents = async () => {
       try {
         setLoading(true);
-        
-        const res = await axios.get(`http://127.0.0.1:8000/classroom/${classroomId}`);
-        
-        const cls = res.data.data;
-        console.log(cls);
 
-        setClassName(cls.classroom_name);
+        const res = await axios.get(
+          `http://127.0.0.1:8000/classroom/${classroomId}`
+        );
 
-        const studentObjects: Student[] = cls.students.map((s: string) => ({
-          id: s,
-          name: s, 
+        const classData: Classroom = res.data;
+
+        setClassroom(classData);
+
+        const studentList = classData.students.map((stu) => ({
+          id: stu._id,
+          name: stu.name,
         }));
 
-        setStudents(studentObjects);
+        setStudents(studentList);
 
-        
-        const initialAttendance: AttendanceState = {};
-        studentObjects.forEach((student) => (initialAttendance[student.id] = null));
-        setAttendance(initialAttendance);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching classroom:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClassData();
+    fetchStudents();
   }, [classroomId]);
 
-  // Toggle attendance
   const handleAttendanceChange = (studentId: string, value: "P" | "A") => {
     setAttendance((prev) => ({
       ...prev,
@@ -73,33 +74,36 @@ export default function AttendanceSheetPage() {
     }));
   };
 
-  // Save attendance
-  const handleSaveAttendance = async () => {
-    console.log("Saving attendance for class:", classroomId, attendance);
-    alert("Attendance saved successfully!");
-    // TODO: POST attendance to backend
+  const handleSaveAttendance = () => {
+    console.log("Attendance:", attendance);
+    alert("Attendance saved!");
   };
 
   return (
     <div className="flex min-h-screen">
       <TeacherPortalSidebar />
+
       <main className="flex-1 p-6 ml-0 md:ml-64 bg-gray-50">
-        <h1 className="text-2xl font-bold mb-2">{className?.classroom_name || "Attendance Sheet"}</h1>
+        <h1 className="text-2xl font-bold mb-4">
+          {classroom?.classroom_name || "Attendance Sheet"}
+        </h1>
 
         {loading ? (
           <p>Loading students...</p>
         ) : (
-          <Card className="border-gray-300">
+          <Card>
             <CardHeader>
               <CardTitle>Students</CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
               {students.map((student) => (
                 <div
                   key={student.id}
-                  className="flex items-center justify-between border-b py-2"
+                  className="flex justify-between items-center border-b py-2"
                 >
                   <span className="font-medium">{student.name}</span>
+
                   <div className="flex gap-4">
                     <label className="flex items-center gap-2">
                       <Checkbox
@@ -110,6 +114,7 @@ export default function AttendanceSheetPage() {
                       />
                       Present
                     </label>
+
                     <label className="flex items-center gap-2">
                       <Checkbox
                         checked={attendance[student.id] === "A"}
