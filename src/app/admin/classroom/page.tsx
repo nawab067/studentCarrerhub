@@ -4,16 +4,27 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { motion } from "framer-motion";
+
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+
 import { Pencil, Trash2, Plus } from "lucide-react";
 import ClassroomDialog from "@/components/admin/classroom-add-students";
 
-// IMPORT THE DIALOG
+/* =======================
+   TYPES
+======================= */
 
 interface Teacher {
-  id: string;
+  _id: string;
   name: string;
 }
 
@@ -21,81 +32,83 @@ interface Classroom {
   _id: string;
   classroom_name: string;
   students: string[];
+  teacherId?: string;
   teacher?: Teacher | null;
 }
 
-interface Student {
-  _id: string;
-  name: string;
-}
+/* =======================
+   COMPONENT
+======================= */
 
 export default function ClassroomPage() {
   const router = useRouter();
 
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Dialog open handler
   const [openClassroomId, setOpenClassroomId] = useState<string | null>(null);
 
-  // Fetch classrooms
+  /* =======================
+     FETCH CLASSROOMS + TEACHERS
+  ======================= */
+
   const fetchClassrooms = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/classrooms', {
-        headers: { "Content-Type": "application/json" },
-      });
+      // 1️⃣ Get raw classrooms
+      const res = await axios.get("http://127.0.0.1:8000/classrooms");
+      const rawClassrooms: Classroom[] = Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
 
-      const data = Array.isArray(res.data) ? res.data : res.data.classrooms;
-      setClassrooms(data);
+      // 2️⃣ Enrich with teacher names
+      const enriched = await Promise.all(
+        rawClassrooms.map(async (cls) => {
+          if (!cls.teacherId) {
+            return { ...cls, teacher: null };
+          }
+
+          try {
+            const detailRes = await axios.get(
+              `http://127.0.0.1:8000/classroom/${cls._id}`
+            );
+
+            return {
+              ...cls,
+              teacher: detailRes.data.teacher || null,
+            };
+          } catch {
+            return { ...cls, teacher: null };
+          }
+        })
+      );
+
+      setClassrooms(enriched);
     } catch (error) {
       console.error("Classroom fetch error:", error);
-    }
-  };
-
-  // Fetch students
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get('http://127.0.0.1:8000/Student', {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      setStudents(res.data);
-    } catch (error) {
-      console.error("Student fetch error:", error);
+      setClassrooms([]);
     }
   };
 
   useEffect(() => {
     fetchClassrooms();
-    fetchStudents();
   }, []);
 
-  // Delete classroom
+  /* =======================
+     DELETE CLASSROOM
+  ======================= */
+
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("Are you sure you want to delete this classroom?")) return;
+
     try {
       await axios.delete(`http://127.0.0.1:8000/classroom/${id}`);
-      setClassrooms(prev => prev.filter(c => c._id !== id));
+      setClassrooms((prev) => prev.filter((c) => c._id !== id));
     } catch (error) {
       console.error("Delete error:", error);
     }
   };
-  const handleEdit = (id: string) => {
-    setOpenClassroomId(id);
-    try{
-      setLoading(false);
-      const response= axios.post(`http://127.0.0.1:8000/classroom/${id}`,{
-        headers: { 'Content-Type': 'application/json' }
 
-      });
-
-    }catch(error){
-      console.log(error);
-    }finally{
-      setLoading(false);
-    }
-  };
+  /* =======================
+     UI
+  ======================= */
 
   return (
     <motion.div
@@ -106,11 +119,12 @@ export default function ClassroomPage() {
     >
       <div className="w-full max-w-5xl flex flex-col space-y-6">
 
-        {/* Header */}
+        {/* HEADER */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Classrooms</h1>
+
           <Button
-            onClick={() => router.push('/admin/classroom/add-classroom')}
+            onClick={() => router.push("/admin/classroom/add-classroom")}
             className="flex items-center gap-2"
           >
             <Plus className="h-5 w-5" />
@@ -118,7 +132,7 @@ export default function ClassroomPage() {
           </Button>
         </div>
 
-        {/* Table */}
+        {/* TABLE */}
         <Card className="w-full shadow-lg rounded-2xl">
           <CardContent>
             <Table>
@@ -136,40 +150,38 @@ export default function ClassroomPage() {
                   <TableRow key={c._id}>
                     <TableCell>{c.classroom_name}</TableCell>
                     <TableCell>{c.students.length}</TableCell>
-                    <TableCell>{c.teacher?.name || "unassigned"}</TableCell>
+
+                    {/* ✅ TEACHER NAME */}
+                    <TableCell>
+                      {c.teacher ? c.teacher.name : "Unassigned"}
+                    </TableCell>
 
                     <TableCell className="text-right space-x-2">
-
-                      {/* Edit */}
                       <Button
                         variant="outline"
                         size="icon"
-                        className="rounded-xl"
-                        onClick={() => router.push(`/admin/classroom/edit/${c._id}`)}
+                        onClick={() =>
+                          router.push(`/admin/classroom/edit/${c._id}`)
+                        }
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
 
-                      {/* Add Students - OPEN DIALOG */}
                       <Button
                         variant="outline"
                         size="icon"
-                        className="rounded-xl"
                         onClick={() => setOpenClassroomId(c._id)}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
 
-                      {/* Delete */}
                       <Button
                         variant="destructive"
                         size="icon"
-                        className="rounded-xl"
                         onClick={() => handleDelete(c._id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-
                     </TableCell>
                   </TableRow>
                 ))}
@@ -182,25 +194,18 @@ export default function ClassroomPage() {
                   </TableRow>
                 )}
               </TableBody>
-
             </Table>
           </CardContent>
         </Card>
       </div>
 
-      {/* 📌 CLASSROOM DIALOG */}
-
+      {/* ADD STUDENTS DIALOG */}
       <ClassroomDialog
-      
         open={Boolean(openClassroomId)}
         onClose={() => setOpenClassroomId(null)}
         classroomId={openClassroomId}
-        onStudentAdded={() => {
-          fetchClassrooms();
-          fetchStudents();
-        }}
+        onStudentAdded={fetchClassrooms}
       />
-
     </motion.div>
   );
 }
