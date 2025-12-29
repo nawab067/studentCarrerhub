@@ -1,12 +1,33 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
+
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 interface Student {
   id: string;
@@ -41,24 +62,21 @@ export default function AttendanceSheetPage() {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-
         const res = await axios.get(
           `http://127.0.0.1:8000/classroom/${classroomId}`
         );
 
         const classData: Classroom = res.data;
-
         setClassroom(classData);
 
-        const studentList = classData.students.map((stu) => ({
-          id: stu._id,
-          name: stu.name,
-        }));
-
-        setStudents(studentList);
-
+        setStudents(
+          classData.students.map((s) => ({
+            id: s._id,
+            name: s.name,
+          }))
+        );
       } catch (err) {
-        console.error("Error fetching classroom:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -67,76 +85,124 @@ export default function AttendanceSheetPage() {
     fetchStudents();
   }, [classroomId]);
 
-  const handleAttendanceChange = (studentId: string, value: "P" | "A") => {
+  const handleAttendanceChange = (
+    studentId: string,
+    value: "P" | "A"
+  ) => {
     setAttendance((prev) => ({
       ...prev,
-      [studentId]: prev[studentId] === value ? null : value,
+      [studentId]: value,
     }));
   };
 
   const handleSaveAttendance = () => {
-    console.log("Attendance:", attendance);
-    alert("Attendance saved!");
+    console.log(attendance);
+    alert("Attendance saved successfully");
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-muted/40">
       <TeacherPortalSidebar />
 
-      <main className="flex-1 p-6 ml-0 md:ml-64 bg-gray-50">
-        <h1 className="text-2xl font-bold mb-4">
-          {classroom?.classroom_name || "Attendance Sheet"}
-        </h1>
+      <main className="flex-1 p-6 md:ml-64">
+        <Card className="max-w-5xl mx-auto shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl">
+              {classroom?.classroom_name || "Attendance Sheet"}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Mark student attendance for today
+            </p>
+          </CardHeader>
 
-        {loading ? (
-          <p>Loading students...</p>
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Students</CardTitle>
-            </CardHeader>
+          <Separator />
 
-            <CardContent className="space-y-4">
-              {students.map((student) => (
-                <div
-                  key={student.id}
-                  className="flex justify-between items-center border-b py-2"
-                >
-                  <span className="font-medium">{student.name}</span>
+          <CardContent className="pt-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : (
+              <>
+                <ScrollArea className="h-[420px] rounded-md border">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableRow>
+                        <TableHead>Student Name</TableHead>
+                        <TableHead className="text-center">
+                          Status
+                        </TableHead>
+                        <TableHead className="text-right">
+                          Mark Attendance
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
 
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2">
-                      <Checkbox
-                        checked={attendance[student.id] === "P"}
-                        onCheckedChange={() =>
-                          handleAttendanceChange(student.id, "P")
-                        }
-                      />
-                      Present
-                    </label>
+                    <TableBody>
+                      {students.map((student) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">
+                            {student.name}
+                          </TableCell>
 
-                    <label className="flex items-center gap-2">
-                      <Checkbox
-                        checked={attendance[student.id] === "A"}
-                        onCheckedChange={() =>
-                          handleAttendanceChange(student.id, "A")
-                        }
-                      />
-                      Absent
-                    </label>
-                  </div>
+                          <TableCell className="text-center">
+                            {attendance[student.id] === "P" && (
+                              <Badge className="bg-green-600">
+                                Present
+                              </Badge>
+                            )}
+                            {attendance[student.id] === "A" && (
+                              <Badge variant="destructive">
+                                Absent
+                              </Badge>
+                            )}
+                            {!attendance[student.id] && (
+                              <Badge variant="secondary">
+                                Not Marked
+                              </Badge>
+                            )}
+                          </TableCell>
+
+                          <TableCell className="text-right">
+                            <ToggleGroup
+                              type="single"
+                              value={attendance[student.id] ?? ""}
+                              onValueChange={(val) =>
+                                handleAttendanceChange(
+                                  student.id,
+                                  val as "P" | "A"
+                                )
+                              }
+                            >
+                              <ToggleGroupItem value="P">
+                                Present
+                              </ToggleGroupItem>
+                              <ToggleGroupItem value="A">
+                                Absent
+                              </ToggleGroupItem>
+                            </ToggleGroup>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+
+                <div className="flex justify-end pt-4">
+                  <Button
+                    size="lg"
+                    className="bg-sky-500 hover:bg-sky-600"
+                    onClick={handleSaveAttendance}
+                  >
+                    Save Attendance
+                  </Button>
                 </div>
-              ))}
-
-              <Button
-                className="mt-4 bg-sky-500 hover:bg-sky-600"
-                onClick={handleSaveAttendance}
-              >
-                Save Attendance
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+              </>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
