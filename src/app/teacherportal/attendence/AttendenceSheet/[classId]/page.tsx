@@ -29,6 +29,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
+/* =======================
+   Types
+======================= */
+
 interface Student {
   id: string;
   name: string;
@@ -47,6 +51,20 @@ interface Classroom {
   }[];
 }
 
+interface AttendanceItem {
+  student_id: string;
+  status: "P" | "A";
+}
+
+interface AttendancePayload {
+  classroom_id: string;
+  attendance: AttendanceItem[];
+}
+
+/* =======================
+   Component
+======================= */
+
 export default function AttendanceSheetPage() {
   const params = useParams();
   const classroomId = params.classId as string;
@@ -56,49 +74,80 @@ export default function AttendanceSheetPage() {
   const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [loading, setLoading] = useState(true);
 
+ 
+
   useEffect(() => {
     if (!classroomId) return;
 
-    const fetchStudents = async () => {
+    const fetchClassroom = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
+
+        const res = await axios.get<Classroom>(
           `http://127.0.0.1:8000/classroom/${classroomId}`
         );
 
-        const classData: Classroom = res.data;
-        setClassroom(classData);
+        setClassroom(res.data);
 
         setStudents(
-          classData.students.map((s) => ({
+          res.data.students.map((s) => ({
             id: s._id,
             name: s.name,
           }))
         );
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error("Failed to fetch classroom:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStudents();
+    fetchClassroom();
   }, [classroomId]);
 
-  const handleAttendanceChange = (
-    studentId: string,
-    value: "P" | "A"
-  ) => {
+  const handleAttendanceChange = (studentId: string, value: "P" | "A") => {
     setAttendance((prev) => ({
       ...prev,
       [studentId]: value,
     }));
   };
 
-  const handleSaveAttendance = () => {
-    console.log(attendance);
-    alert("Attendance saved successfully");
+
+
+  const handleSaveAttendance = async () => {
+    try {
+      const attendanceArray: AttendanceItem[] = Object.entries(attendance)
+        .filter(([, status]) => status !== null)
+        .map(([studentId, status]) => ({
+          student_id: studentId,
+          status: status as "P" | "A",
+        }));
+
+      if (attendanceArray.length === 0) {
+        alert("Please mark attendance before saving");
+        return;
+      }
+
+      const payload: AttendancePayload = {
+        classroom_id: classroomId,
+        attendance: attendanceArray,
+      };
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/mark_attendance",
+        payload
+      );
+
+      alert(response.data.message);
+    } catch (error: any) {
+      console.error("Attendance error:", error?.response?.data || error);
+      alert(
+        error?.response?.data?.message || "Failed to save attendance"
+      );
+    }
   };
+
+
 
   return (
     <div className="flex min-h-screen bg-muted/40">
@@ -169,12 +218,13 @@ export default function AttendanceSheetPage() {
                             <ToggleGroup
                               type="single"
                               value={attendance[student.id] ?? ""}
-                              onValueChange={(val) =>
+                              onValueChange={(val) => {
+                                if (!val) return;
                                 handleAttendanceChange(
                                   student.id,
                                   val as "P" | "A"
-                                )
-                              }
+                                );
+                              }}
                             >
                               <ToggleGroupItem value="P">
                                 Present
