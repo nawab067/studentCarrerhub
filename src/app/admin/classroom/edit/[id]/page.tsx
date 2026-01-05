@@ -44,17 +44,23 @@ export default function ClassroomEditPageWrapper() {
     getClassroom();
   }, []);
 
-  async function update_classroom(data: { classroom_name: string; teacherId: string }) {
+  // Update classroom
+  async function update_classroom(data: { classroom_name: string; teacherId: string | null }) {
+    if (!classroomData) return;
+
     try {
       setLoading(true);
 
+      // Construct payload exactly as backend expects
+      const payload = {
+        classroom_name: data.classroom_name,
+        students: classroomData.students || [], // make sure students is always an array
+        teacherId: data.teacherId || null,      // convert undefined to null
+      };
+
       await axios.put(
         `http://127.0.0.1:8000/classroom/${id}`,
-        {
-          ...classroomData,
-          classroom_name: data.classroom_name,
-          teacherId: data.teacherId,
-        },
+        payload,
         {
           headers: { "Content-Type": "application/json" },
         }
@@ -70,13 +76,12 @@ export default function ClassroomEditPageWrapper() {
     }
   }
 
-
   return (
-  <ClassroomEditPage
-    onSubmit={update_classroom}
-    loading={loading}
-    teacher={teachers}
-    classroomData={classroomData}  
-  />
-);
+    <ClassroomEditPage
+      onSubmit={update_classroom}
+      loading={loading}
+      teacher={teachers}
+      classroomData={classroomData}  
+    />
+  );
 }

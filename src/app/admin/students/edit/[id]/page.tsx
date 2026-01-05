@@ -5,20 +5,20 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import StudentEditPage from "@/components/admin/student-edit";
 import { useRouter, useParams } from "next/navigation";
-import { student } from "@/app/admin/students/addStudent/page";
+import { Student } from "@/app/admin/students/addStudent/page";
 
 export default function EditstudentPageWrapper() {
   const router = useRouter();
   const params = useParams();
 
   const [loading, setLoading] = useState(false);
-  const [studentData, setStudentData] = useState<student | null>(null);
+  const [studentData, setStudentData] = useState<Student| null>(null);
 
   // Fetch student data on load
   async function getStudent() {
     try {
       setLoading(true);
-      const response = await axios.get<student>(
+      const response = await axios.get<Student>(
         `http://127.0.0.1:8000/student/${params.id}`
       );
       setStudentData(response.data);
@@ -35,7 +35,7 @@ export default function EditstudentPageWrapper() {
   }, []);
 
   // Update student
-  async function editStudent(updatedStudent: student) {
+  async function editStudent(updatedStudent: Student) {
     try {
       setLoading(true);
 

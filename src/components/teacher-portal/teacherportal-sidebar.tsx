@@ -64,8 +64,8 @@ export default function TeacherPortalSidebar() {
       icon: BookOpen,
     },
     {
-      title: "Assignments",
-      href: "/teacherportal/Assignments",
+      title: "Assesments",
+      href: `/teacherportal/Assignments/${teacherId}`,
       icon: BookOpen,
     },
     teacherId && {

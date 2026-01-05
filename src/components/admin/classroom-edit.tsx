@@ -1,3 +1,4 @@
+'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,40 +14,34 @@ import { useState, useEffect } from "react";
 import { teacher, classroom } from "@/app/admin/classroom/types";
 
 export interface ClassroomEditPageProps {
-  onSubmit: (data: { classroom_name: string; teacherId: string }) => Promise<void>;
+  onSubmit: (data: { classroom_name: string; teacherId: string | null }) => Promise<void>;
   loading: boolean;
   teacher: teacher[];
-  classroomData: classroom | null;   // 👈 ADD THIS
+  classroomData: classroom | null;
 }
 
 export default function ClassroomEditPage({
   onSubmit,
   loading,
   teacher,
-  classroomData,   // 👈 Receive classroom info
+  classroomData,
 }: ClassroomEditPageProps) {
-
   const [classroomName, setClassroomName] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
 
-  // 🟢 Pre-fill the form when classroomData loads
+  // Pre-fill the form when classroomData is loaded
   useEffect(() => {
     if (classroomData) {
       setClassroomName(classroomData.classroom_name);
-      setSelectedTeacher(classroomData.teacherId);  
+      setSelectedTeacher(classroomData.teacherId ?? null);
     }
   }, [classroomData]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!classroomName) {
-      alert("Please enter classroom name");
-      return;
-    }
-
-    if (!selectedTeacher) {
-      alert("Please select a teacher");
+    if (!classroomName.trim()) {
+      alert("Please enter a classroom name.");
       return;
     }
 
@@ -64,15 +59,13 @@ export default function ClassroomEditPage({
         </CardHeader>
 
         <CardContent className="space-y-4">
-          
           {/* Classroom Name Input */}
           <div>
             <Label htmlFor="classroom_name">Classroom Name</Label>
             <Input
               id="classroom_name"
-              name="classroom_name"
               placeholder="Enter classroom name"
-              value={classroomName}             // 👈 DEFAULT VALUE APPLIED
+              value={classroomName}
               onChange={(e) => setClassroomName(e.target.value)}
               required
             />
@@ -82,13 +75,12 @@ export default function ClassroomEditPage({
           <div>
             <Label>Teacher</Label>
             <Select
-              value={selectedTeacher?? ""}     
+              value={selectedTeacher ?? ""}
               onValueChange={(value) => setSelectedTeacher(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a teacher" />
               </SelectTrigger>
-
               <SelectContent>
                 {teacher.map((t) => (
                   <SelectItem key={t._id} value={t._id}>
