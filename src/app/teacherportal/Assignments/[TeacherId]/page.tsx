@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { BookOpen, Users } from "lucide-react";
 
 export interface AssignedClass {
@@ -75,7 +76,7 @@ export default function TeacherClassesPage() {
         {error && <p className="text-red-500">{error}</p>}
 
         {!loading && !error && assignedClasses.length === 0 && (
-          <p className="text-gray-500">No classes assigned yet.</p>
+          <p className="text-gray-500">No Assesment assigned yet.</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -87,12 +88,23 @@ export default function TeacherClassesPage() {
                 </CardTitle>
                 <BookOpen className="h-5 w-5 text-sky-600" />
               </CardHeader>
-              <CardContent className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-sky-600" />
-                <p className="text-md font-medium text-sky-700">
-                  {cls.students.length} Students
-                </p>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-sky-600" />
+                  <p className="text-md font-medium text-sky-700">
+                    {cls.students.length} Students
+                  </p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="w-full border-sky-400 text-sky-700 hover:bg-sky-200"
+                >
+                  Manage Assessments
+                </Button>
               </CardContent>
+
+              
             </Card>
           ))}
         </div>
