@@ -2,10 +2,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { student } from "@/app/admin/students/addStudent/page";
+import { Student } from "@/app/admin/students/addStudent/page";
 
 interface AddstudentPageProps {
-  onSubmit: (student: student) => Promise<void>;
+  onSubmit: (student: Student) => Promise<void>;
   loading: boolean;
 }
 
@@ -15,7 +15,7 @@ export default function AddstudentPage({ onSubmit, loading }: AddstudentPageProp
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const student: student = {
+    const student: Student = {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       state: formData.get("state") as string,

@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
@@ -28,6 +28,7 @@ interface LoginFormProps {
   isButtonDisabled?: boolean
   onChangeEmail: (e: React.ChangeEvent<HTMLInputElement>) => void
   onChangePassword: (e: React.ChangeEvent<HTMLInputElement>) => void
+  className?: string
 }
 
 export function LoginForm({
@@ -40,15 +41,13 @@ export function LoginForm({
   isButtonDisabled = false,
   onChangeEmail,
   onChangePassword,
-  ...props
-}: LoginFormProps & React.ComponentProps<"div">) {
+}: LoginFormProps) {
   return (
     <div
       className={cn(
         "flex min-h-screen items-center justify-center bg-sky-50 px-4 dark:bg-slate-950",
         className
       )}
-      {...props}
     >
       <Card className="w-full max-w-md border-sky-100 shadow-xl dark:border-sky-900">
         <CardHeader className="space-y-2 text-center">
