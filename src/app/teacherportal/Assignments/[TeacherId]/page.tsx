@@ -1,5 +1,5 @@
 'use client'
-
+import StudentDialog from '@/components/teacher-portal/add-assesment'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import TeacherPortalSidebar from '@/components/teacher-portal/teacherportal-sidebar'
@@ -42,6 +42,7 @@ export default function TeacherClassesPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [openDialog, setOpenDialog] = useState(false)
+  const [openAddAssessment, setOpenAddAssessment] = useState(false)
   const [activeClassName, setActiveClassName] = useState('')
 
   // Get teacher ID
@@ -95,6 +96,7 @@ export default function TeacherClassesPage() {
   }
 
   return (
+    
     <div className="flex min-h-screen">
       <TeacherPortalSidebar />
 
@@ -125,7 +127,12 @@ export default function TeacherClassesPage() {
                     {cls.students.length} Students
                   </p>
                 </div>
-
+                <StudentDialog
+                  open={openAddAssessment}
+                  onOpenChange={setOpenAddAssessment}
+                  classId={cls._id}
+                  teacherId={teacherId!}
+                />
                 <Button
                   variant="outline"
                   className="w-full border-sky-400 text-sky-700 hover:bg-sky-200"
@@ -162,6 +169,7 @@ export default function TeacherClassesPage() {
         <Button
           size="sm"
           className="bg-sky-600 hover:bg-sky-700 text-white"
+          onClick={() => setOpenAddAssessment(true)}
 
         >
           Add Assessment
@@ -171,6 +179,7 @@ export default function TeacherClassesPage() {
           size="sm"
           variant="destructive"
           disabled={assessments.length === 0}
+
         >
           Delete Assessment
         </Button>
