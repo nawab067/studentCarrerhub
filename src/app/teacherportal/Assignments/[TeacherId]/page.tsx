@@ -1,4 +1,5 @@
 'use client'
+
 import StudentDialog from '@/components/teacher-portal/add-assesment'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
@@ -17,8 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from '@/components/ui/dialog'
+
 
 export interface AssignedClass {
   _id: string
@@ -31,9 +32,17 @@ export interface Assessment {
   _id: string
   name: string
   description: string
-  teacherId: string
   classId: string
+  created_at: string
 }
+
+const formatDate = (date: string) =>
+  new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+
 
 export default function TeacherClassesPage() {
   const [teacherId, setTeacherId] = useState<string | null>(null)
@@ -41,11 +50,14 @@ export default function TeacherClassesPage() {
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
   const [openDialog, setOpenDialog] = useState(false)
   const [openAddAssessment, setOpenAddAssessment] = useState(false)
+
+  const [activeClassId, setActiveClassId] = useState<string | null>(null)
   const [activeClassName, setActiveClassName] = useState('')
 
-  // Get teacher ID
+
   useEffect(() => {
     const id = localStorage.getItem('teacherId')
     if (!id) {
@@ -55,7 +67,7 @@ export default function TeacherClassesPage() {
     setTeacherId(id)
   }, [])
 
-  // Fetch assigned classes
+
   useEffect(() => {
     if (!teacherId) return
 
@@ -76,27 +88,45 @@ export default function TeacherClassesPage() {
     fetchClasses()
   }, [teacherId])
 
-  // Fetch assessments
-  const handleManageAssessments = async (cls: AssignedClass) => {
+ 
+  const fetchAssessments = async (classId: string) => {
     try {
-      setLoading(true)
-      setActiveClassName(cls.classroom_name)
-
       const res = await axios.get(
-        `http://127.0.0.1:8000/get_assesments/${cls._id}`
+        `http://127.0.0.1:8000/get_assesments/${classId}`
       )
-
       setAssessments(res.data?.data || [])
-      setOpenDialog(true)
     } catch {
-      setError('Failed to load assessments.')
-    } finally {
-      setLoading(false)
+      setError('Failed to refresh assessments.')
+    }
+  }
+
+  const handleManageAssessments = (cls: AssignedClass) => {
+    setActiveClassId(cls._id)
+    setActiveClassName(cls.classroom_name)
+    fetchAssessments(cls._id)
+    setOpenDialog(true)
+  }
+
+  const handleAssessmentAdded = () => {
+    if (!activeClassId) return
+    fetchAssessments(activeClassId)
+    setOpenAddAssessment(false)
+  }
+
+  const handleDeleteAssessment = async (assessmentId: string) => {
+    try {
+      await axios.delete(
+        `http://127.0.0.1:8000/delete_assesment/${assessmentId}`
+      )
+      setAssessments((prev) =>
+        prev.filter((a) => a._id !== assessmentId)
+      )
+    } catch {
+      setError('Failed to delete assessment.')
     }
   }
 
   return (
-    
     <div className="flex min-h-screen">
       <TeacherPortalSidebar />
 
@@ -106,12 +136,12 @@ export default function TeacherClassesPage() {
         {loading && <p>Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-        {/* Classes */}
+ 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {assignedClasses.map((cls) => (
             <Card
               key={cls._id}
-              className="bg-sky-100 border-sky-300 shadow-md hover:shadow-lg transition"
+              className="bg-sky-100 border-sky-300 shadow-md"
             >
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-semibold">
@@ -127,12 +157,7 @@ export default function TeacherClassesPage() {
                     {cls.students.length} Students
                   </p>
                 </div>
-                <StudentDialog
-                  open={openAddAssessment}
-                  onOpenChange={setOpenAddAssessment}
-                  classId={cls._id}
-                  teacherId={teacherId!}
-                />
+
                 <Button
                   variant="outline"
                   className="w-full border-sky-400 text-sky-700 hover:bg-sky-200"
@@ -145,86 +170,100 @@ export default function TeacherClassesPage() {
           ))}
         </div>
 
-        {/* CENTERED DIALOG */}
-       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-  <DialogContent className="max-w-xl p-0">
-    <DialogHeader className="p-6 border-b relative space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <DialogTitle className="text-xl font-bold text-sky-700">
-            {activeClassName} Assessments
-          </DialogTitle>
-          <DialogDescription className="text-gray-500">
-            Manage assessments for this class
-          </DialogDescription>
-        </div>
+     
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogContent
+            className="
+              max-w-2xl 
+              w-full 
+              max-h-[90vh] 
+              overflow-hidden 
+              p-0
+            "
+          >
+            {/* HEADER */}
+            <DialogHeader className="p-6 border-b">
+              <div className="flex items-start justify-between">
+                <div>
+                  <DialogTitle className="text-xl font-bold text-sky-700">
+                    {activeClassName} Assessments
+                  </DialogTitle>
+                  <DialogDescription>
+                    Manage assessments for this class
+                  </DialogDescription>
+                </div>
 
-        <DialogClose className="rounded-full p-1 hover:bg-gray-100">
-          <X className="h-5 w-5" />
-        </DialogClose>
-      </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setOpenDialog(false)}
+                >
+                  <X />
+                </Button>
+              </div>
 
-      {/* ACTION BUTTONS */}
-      <div className="flex gap-3">
-        <Button
-          size="sm"
-          className="bg-sky-600 hover:bg-sky-700 text-white"
-          onClick={() => setOpenAddAssessment(true)}
+              <Button
+                size="sm"
+                onClick={() => setOpenAddAssessment(true)}
+                className="
+                  mt-4 
+                  bg-sky-600 
+                  text-white 
+                  w-fit
+                  transition-colors
+                  hover:bg-emerald-600
+                  active:bg-emerald-700
+                "
+              >
+                Add Assessment
+              </Button>
+            </DialogHeader>
 
-        >
-          Add Assessment
-        </Button>
+         
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
+              {assessments.length === 0 && (
+                <p className="text-center text-gray-500">
+                  No assessments added yet
+                </p>
+              )}
 
-        <Button
-          size="sm"
-          variant="destructive"
-          disabled={assessments.length === 0}
+              {assessments.map((assessment) => (
+                <Card key={assessment._id}>
+                  <CardHeader className="flex flex-row justify-between items-start">
+                    <div>
+                      <CardTitle>{assessment.name}</CardTitle>
+                      <p className="text-xs text-gray-500">
+                        Created on {formatDate(assessment.created_at)}
+                      </p>
+                    </div>
 
-        >
-          Delete Assessment
-        </Button>
-      </div>
-    </DialogHeader>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={() => handleDeleteAssessment(assessment._id)}
+                    >
+                      🗑
+                    </Button>
+                  </CardHeader>
 
-    {/* BODY */}
-    <div className="p-6 max-h-[60vh] overflow-y-auto space-y-3 bg-sky-50">
-      {loading && <p>Loading assessments...</p>}
+                  <CardContent>
+                    {assessment.description}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
 
-      {!loading && assessments.length === 0 && (
-        <p className="text-gray-500">
-          No assessments found for this class.
-        </p>
-      )}
-
-      {assessments.map((assessment) => (
-        <Card
-          key={assessment._id}
-          className="border border-sky-200 shadow-sm"
-        >
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base text-sky-800">
-              {assessment.name}
-            </CardTitle>
-
-            <Button
-              size="icon"
-              variant="destructive"
-            >
-              🗑
-            </Button>
-          </CardHeader>
-
-          <CardContent>
-            <p className="text-sm text-gray-600">
-              {assessment.description}
-            </p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </DialogContent>
-</Dialog>
-
+      
+        {activeClassId && (
+          <StudentDialog
+            open={openAddAssessment}
+            onOpenChange={setOpenAddAssessment}
+            classId={activeClassId}
+            onAssessmentAdded={handleAssessmentAdded}
+          />
+        )}
       </main>
     </div>
   )
