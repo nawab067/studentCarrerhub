@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -15,29 +15,28 @@ export default function ClassroomEditPageWrapper() {
   const [teachers, setTeachers] = useState<teacher[]>([]);
 
   // Fetch teacher list
-  async function fetchTeachers() {
+  const fetchTeachers = async () => {
     try {
       const res = await axios.get<teacher[]>("http://127.0.0.1:8000/teacher");
       setTeachers(res.data);
     } catch (err) {
       console.error("Error fetching teachers:", err);
     }
-  }
+  };
 
   // Fetch classroom data
-  async function getClassroom() {
+  const getClassroom = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<classroom>(
-        `http://127.0.0.1:8000/classroom/${id}`
-      );
+      const response = await axios.get<classroom>(`http://127.0.0.1:8000/classroom/${id}`);
       setClassroomData(response.data);
     } catch (error) {
       console.error("Error fetching classroom:", error);
+      alert("Failed to fetch classroom data.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchTeachers();
@@ -45,43 +44,48 @@ export default function ClassroomEditPageWrapper() {
   }, []);
 
   // Update classroom
-  async function update_classroom(data: { classroom_name: string; teacherId: string | null }) {
-    if (!classroomData) return;
+  const update_classroom = async (data: { classroom_name: string; teacherId: string | null }) => {
+  if (!classroomData) return;
 
-    try {
-      setLoading(true);
-
-      // Construct payload exactly as backend expects
-      const payload = {
-        classroom_name: data.classroom_name,
-        students: classroomData.students || [], // make sure students is always an array
-        teacherId: data.teacherId || null,      // convert undefined to null
-      };
-
-      await axios.put(
-        `http://127.0.0.1:8000/classroom/${id}`,
-        payload,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      alert("Classroom updated successfully.");
-      router.push("/admin/classroom");
-    } catch (error) {
-      console.error("Error updating classroom:", error);
-      alert("Error updating classroom.");
-    } finally {
-      setLoading(false);
-    }
+  if (!data.classroom_name || data.classroom_name.trim() === "") {
+    alert("Classroom name cannot be empty.");
+    return;
   }
+
+  try {
+    setLoading(true);
+
+
+    const studentIds = classroomData.students.map((s: any) => (typeof s === 'string' ? s : s._id));
+
+    const payload = {
+      classroom_name: data.classroom_name,
+      students: studentIds,   
+      teacherId: data.teacherId ?? null,
+    };
+
+    console.log("Payload sent to backend:", payload);
+    await axios.put(`http://127.0.0.1:8000/classroom/${id}`, payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    alert("Classroom updated successfully.");
+    router.push("/admin/classroom");
+  } catch (error: any) {
+    console.error("Error updating classroom:", error);
+    alert("Failed to update classroom.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <ClassroomEditPage
       onSubmit={update_classroom}
       loading={loading}
       teacher={teachers}
-      classroomData={classroomData}  
+      classroomData={classroomData}
     />
   );
 }
