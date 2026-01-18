@@ -55,7 +55,7 @@ export default function TeacherPortalSidebar() {
   const teacherNav = [
     {
       title: "Dashboard",
-      href: "/teacherportal/dashboard",
+      href: `/teacherportal/dashboard/${teacherId}`,
       icon: LayoutDashboard,
     },
     {

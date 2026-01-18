@@ -256,11 +256,12 @@ export default function TeacherClassesPage() {
         </Dialog>
 
       
-        {activeClassId && (
+        {activeClassId && teacherId && (
           <StudentDialog
             open={openAddAssessment}
             onOpenChange={setOpenAddAssessment}
             classId={activeClassId}
+            teacherId={teacherId}
             onAssessmentAdded={handleAssessmentAdded}
           />
         )}

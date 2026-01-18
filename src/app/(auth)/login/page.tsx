@@ -37,7 +37,7 @@ export default function LoginPage() {
        
         localStorage.setItem("teacherId", String(user._id));
 
-        router.push("/teacherportal/dashboard");
+        router.push(`/teacherportal/dashboard/${user._id}`);
       }
 
       if (user.role === "ADMIN") {
@@ -64,7 +64,7 @@ export default function LoginPage() {
           email={users.email}
           password={users.password}
           onLogin={handleLogin}
-          isLaoding={loading}
+          isLoading={loading}
           isButtonDisabled={buttonDisabled}
           onChangeEmail={(e) =>
             setUsers({ ...users, email: e.target.value })

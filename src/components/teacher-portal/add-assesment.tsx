@@ -22,13 +22,15 @@ interface StudentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   classId: string
+  teacherId: string
   onAssessmentAdded: () => void 
 }
-
+  
 interface AssessmentData {
   name: string
   description: string
   classId: string
+  teacherId?: string
 }
 
 
@@ -36,12 +38,14 @@ export default function StudentDialog({
   open,
   onOpenChange,
   classId,
+  teacherId,
   onAssessmentAdded,
 }: StudentDialogProps) {
   const [assessmentData, setAssessmentData] = useState<AssessmentData>({
     name: '',
     description: '',
     classId,
+    teacherId,  
   })
 
   const [loading, setLoading] = useState(false)

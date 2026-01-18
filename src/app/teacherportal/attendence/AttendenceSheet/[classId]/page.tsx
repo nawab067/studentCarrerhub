@@ -28,6 +28,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/navigation";
 
 /* =======================
    Types
@@ -73,6 +74,7 @@ export default function AttendanceSheetPage() {
   const [attendance, setAttendance] = useState<AttendanceState>({});
   const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
  
 
@@ -249,6 +251,14 @@ export default function AttendanceSheetPage() {
                     Save Attendance
                   </Button>
                 </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-fit mb-3"
+                  onClick={() => router.back()}
+                >
+                  ← Back
+                </Button>
               </>
             )}
           </CardContent>
