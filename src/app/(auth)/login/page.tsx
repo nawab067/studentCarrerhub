@@ -44,6 +44,10 @@ export default function LoginPage() {
         localStorage.setItem("adminId", user._id); 
         router.push("/admin/dashboard");
       }
+      if (user.role === "STUDENT") {
+        localStorage.setItem("studentId", String(user._id));
+        router.push("/studentPortal/dashboard");
+      }
 
     } catch (error) {
       console.error("Login error:", error);
