@@ -75,7 +75,7 @@ export default function TeacherPortalSidebar() {
     },
     {
       title: "Grading",
-      href: "/teacherportal/grading",
+      href: `/teacherportal/grading/${teacherId}`,
       icon: Users,
     },
     {
