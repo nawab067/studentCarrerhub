@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ChangePasswordDialog } from "@/components/student-portal/change-password";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -39,6 +40,7 @@ export default function StudentPortalSidebar() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [openChangePassword, setOpenChangePassword] = useState(false);
 
   useEffect(() => {
     setStudentId(localStorage.getItem("studentId"));
@@ -116,11 +118,14 @@ export default function StudentPortalSidebar() {
 
         <Separator className="bg-emerald-700" />
 
-        {/* Profile */}
+        {/* Profile / Login Section */}
         <div className="mt-auto p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-3 hover:bg-emerald-800">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 hover:bg-emerald-800"
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarImage />
                   <AvatarFallback>SP</AvatarFallback>
@@ -143,7 +148,18 @@ export default function StudentPortalSidebar() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+
+              <DropdownMenuItem onClick={() => setOpenChangePassword(true)}>
+                <Settings className="mr-2 h-4 w-4" />
+                Change Password
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-red-600"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </DropdownMenuItem>
@@ -152,13 +168,19 @@ export default function StudentPortalSidebar() {
         </div>
       </aside>
 
-      {/* Overlay */}
+      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
+
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog
+        open={openChangePassword}
+        onOpenChange={setOpenChangePassword}
+      />
     </>
   );
 }
