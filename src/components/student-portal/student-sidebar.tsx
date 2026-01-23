@@ -41,15 +41,22 @@ export default function StudentPortalSidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    setStudentId(localStorage.getItem("studentId"));
-  }, []);
+  setStudentId(localStorage.getItem("studentId"));
+  const storedEmail = localStorage.getItem("userEmail");
+  if (storedEmail) {
+    setUserEmail(storedEmail);
+  }
+}, []);
+
 
   const handleLogout = () => {
-    localStorage.removeItem("studentId");
-    router.replace("/login");
-  };
+  localStorage.clear();
+  router.replace("/login");
+};
+
 
   const studentNav = [
     { title: "Dashboard", href: "/studentPortal/dashboard", icon: LayoutDashboard },
@@ -136,7 +143,8 @@ export default function StudentPortalSidebar() {
                     <div className="flex flex-col text-sm">
                       <span className="font-medium">Student User</span>
                       <span className="text-xs text-emerald-200">
-                        student@example.com
+                        {userEmail || "student@example.com"}
+
                       </span>
                     </div>
                     <ChevronDown className="ml-auto h-4 w-4" />

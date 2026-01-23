@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -28,6 +28,16 @@ export function ChangePasswordDialog({
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✅ AUTO-FILL EMAIL FROM LOCAL STORAGE
+  useEffect(() => {
+    if (open) {
+      const storedEmail = localStorage.getItem("userEmail");
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
+    }
+  }, [open]);
+
   async function handleSubmit() {
     if (!email || !newPassword) {
       alert("Email and password are required");
@@ -39,12 +49,13 @@ export function ChangePasswordDialog({
 
       await axios.put("http://127.0.0.1:8000/change_student_password", {
         email: email,
-        new_password: newPassword, 
+        new_password: newPassword,
       });
 
-      onOpenChange(false);
-      setEmail("");
+      alert("Password updated successfully");
       setNewPassword("");
+      onOpenChange(false);
+
     } catch (error) {
       console.error("Password change failed:", error);
       alert("Failed to change password");
@@ -66,17 +77,16 @@ export function ChangePasswordDialog({
         </DialogHeader>
 
         <div className="space-y-5 py-4">
-          {/* Email */}
+          {/* Email (AUTO-FILLED & LOCKED) */}
           <div className="space-y-2">
             <Label>Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 type="email"
-                placeholder="teacher@example.com"
                 className="pl-10"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                disabled // 🔒 cannot edit
               />
             </div>
           </div>

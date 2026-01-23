@@ -46,6 +46,7 @@ export default function LoginPage() {
       }
       if (user.role === "STUDENT") {
         localStorage.setItem("studentId", String(user._id));
+        localStorage.setItem("userEmail", user.email);
         router.push("/studentPortal/dashboard");
       }
 
