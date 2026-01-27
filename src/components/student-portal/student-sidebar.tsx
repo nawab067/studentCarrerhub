@@ -60,7 +60,7 @@ export default function StudentPortalSidebar() {
 
   const studentNav = [
     { title: "Dashboard", href: "/studentPortal/dashboard", icon: LayoutDashboard },
-    { title: "My Classes", href: "/studentPortal/classes", icon: BookOpen },
+    { title: "My Classes", href: `/studentPortal/classes/${studentId}`, icon: BookOpen },
     { title: "Assignments", href: "/studentPortal/Assignments", icon: ClipboardList },
     { title: "Grades", href: "/studentPortal/grades", icon: GraduationCap },
     { title: "Settings", href: "/studentPortal/settings", icon: Settings },
