@@ -108,8 +108,7 @@ export default function TeacherTimeTable() {
 
   // Edit slot
   const handleEdit = (slot: TeacherTimeTableProps) => {
-    console.log("Edit slot:", slot);
-    // TODO: Implement edit modal or redirect
+    router.push(`/admin/TeacherTimeTable/edit/${slot._id}`);
   };
 
   // Add new slot

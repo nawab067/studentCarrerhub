@@ -5,17 +5,17 @@ import { useState, useEffect } from "react";
 import TeacherTimeTable from "@/components/admin/TeacherTimeTable";
 import { useRouter } from "next/navigation";
 
-interface Teacher {
+export interface Teacher {
   id: string;
   name: string;
 }
 
-interface Classroom {
+export interface Classroom {
   id: string;
   name: string;
 }
 
-interface TimeSlot {
+ export interface TimeSlot {
   day: string;
   start_time: string;
   end_time: string;

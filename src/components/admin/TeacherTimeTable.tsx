@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ interface Classroom {
   name: string;
 }
 
-interface TimeSlot {
+export interface SlotData {
   day: string;
   start_time: string;
   end_time: string;
@@ -30,34 +30,41 @@ interface TimeSlot {
   classroom_id: string;
 }
 
-interface TimetableFormProps {
+interface Props {
   teachers: Teacher[];
   classrooms: Classroom[];
-  onSubmit: (data: TimeSlot) => void;
+  updateSlot: (updatedSlot: SlotData) => Promise<void>; // parent will handle slotId
+  slotData: SlotData;
   loading?: boolean;
 }
 
 export default function TeacherTimeTable({
   teachers,
   classrooms,
-  onSubmit,
+  updateSlot,
+  slotData,
   loading = false,
-}: TimetableFormProps) {
-  const [day, setDay] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [teacherId, setTeacherId] = useState("");
-  const [classroomId, setClassroomId] = useState("");
+}: Props) {
+  // Initialize form state with default values
+  const [day, setDay] = useState(slotData.day || "Monday");
+  const [startTime, setStartTime] = useState(slotData.start_time || "09:00");
+  const [endTime, setEndTime] = useState(slotData.end_time || "10:00");
+  const [teacherId, setTeacherId] = useState(slotData.teacher_id || "");
+  const [classroomId, setClassroomId] = useState(slotData.classroom_id || "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Update state whenever slotData changes (e.g., after fetch)
+  useEffect(() => {
+    setDay(slotData.day || "Monday");
+    setStartTime(slotData.start_time || "09:00");
+    setEndTime(slotData.end_time || "10:00");
+    setTeacherId(slotData.teacher_id || (teachers[0]?.id ?? ""));
+    setClassroomId(slotData.classroom_id || (classrooms[0]?.id ?? ""));
+  }, [slotData, teachers, classrooms]);
+
+  // Handle form submission
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!day || !startTime || !endTime || !teacherId || !classroomId) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    onSubmit({
+    updateSlot({
       day,
       start_time: startTime,
       end_time: endTime,
@@ -68,20 +75,14 @@ export default function TeacherTimeTable({
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleUpdate}
       className="space-y-4 max-w-md mx-auto p-6 bg-white rounded-lg shadow"
     >
-      {/* Day */}
       <div>
         <Label>Day</Label>
-        <Input
-          placeholder="Monday"
-          value={day}
-          onChange={(e) => setDay(e.target.value)}
-        />
+        <Input value={day} onChange={(e) => setDay(e.target.value)} />
       </div>
 
-      {/* Start Time */}
       <div>
         <Label>Start Time</Label>
         <Input
@@ -91,7 +92,6 @@ export default function TeacherTimeTable({
         />
       </div>
 
-      {/* End Time */}
       <div>
         <Label>End Time</Label>
         <Input
@@ -101,7 +101,6 @@ export default function TeacherTimeTable({
         />
       </div>
 
-      {/* Teacher */}
       <div>
         <Label>Teacher</Label>
         <Select value={teacherId} onValueChange={setTeacherId}>
@@ -109,56 +108,33 @@ export default function TeacherTimeTable({
             <SelectValue placeholder="Select teacher" />
           </SelectTrigger>
           <SelectContent>
-            {teachers.length > 0 ? (
-              teachers.map((teacher) => (
-                <SelectItem
-                  key={`teacher-${teacher.id}`}
-                  value={teacher.id}
-                >
-                  {teacher.name}
-                </SelectItem>
-              ))
-            ) : (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
-                No teachers found
-              </div>
-            )}
+            {teachers.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Classroom */}
-      {/* Classroom */}
-<div>
-  <Label>Classroom</Label>
-  <Select value={classroomId} onValueChange={setClassroomId}>
-    <SelectTrigger>
-      <SelectValue placeholder="Select classroom" />
-    </SelectTrigger>
-    <SelectContent>
-      {classrooms.length > 0 ? (
-        classrooms.map((room) => (
-          <SelectItem
-            key={`classroom-${room.id}`}
-            value={String(room.id)}   // ✅ MUST be string
-          >
-            {room.name}               {/* ✅ render ONCE */}
-          </SelectItem>
-        ))
-      ) : (
-        <div className="px-3 py-2 text-sm text-muted-foreground">
-          No classrooms found
-        </div>
-      )}
-    </SelectContent>
-  </Select>
-</div>
+      <div>
+        <Label>Classroom</Label>
+        <Select value={classroomId} onValueChange={setClassroomId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select classroom" />
+          </SelectTrigger>
+          <SelectContent>
+            {classrooms.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-
-      <Button type="submit"  disabled={loading}>
-        {loading ? "Saving..." : "Add Time Slot"}
-       
-        
+      <Button type="submit" disabled={loading}>
+        {loading ? "Updating..." : "Update Slot"}
       </Button>
     </form>
   );
