@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,54 +33,79 @@ export interface SlotData {
 interface Props {
   teachers: Teacher[];
   classrooms: Classroom[];
-  updateSlot: (updatedSlot: SlotData) => Promise<void>; // parent will handle slotId
-  slotData: SlotData;
+  onAdd: (newSlot: SlotData) => Promise<void>;
   loading?: boolean;
 }
 
-export default function TeacherTimeTable({
+const DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+export default function AddTimeSlotForm({
   teachers,
   classrooms,
-  updateSlot,
-  slotData,
+  onAdd,
   loading = false,
 }: Props) {
-  // Initialize form state with default values
-  const [day, setDay] = useState(slotData.day || "Monday");
-  const [startTime, setStartTime] = useState(slotData.start_time || "09:00");
-  const [endTime, setEndTime] = useState(slotData.end_time || "10:00");
-  const [teacherId, setTeacherId] = useState(slotData.teacher_id || "");
-  const [classroomId, setClassroomId] = useState(slotData.classroom_id || "");
+  // Start all inputs as empty
+  const [day, setDay] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [teacherId, setTeacherId] = useState("");
+  const [classroomId, setClassroomId] = useState("");
 
-  // Update state whenever slotData changes (e.g., after fetch)
-  useEffect(() => {
-    setDay(slotData.day || "Monday");
-    setStartTime(slotData.start_time || "09:00");
-    setEndTime(slotData.end_time || "10:00");
-    setTeacherId(slotData.teacher_id || (teachers[0]?.id ?? ""));
-    setClassroomId(slotData.classroom_id || (classrooms[0]?.id ?? ""));
-  }, [slotData, teachers, classrooms]);
+  // Set first teacher/classroom dynamically if not selected
+ 
 
-  // Handle form submission
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateSlot({
+
+    if (!day || !startTime || !endTime || !teacherId || !classroomId) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    await onAdd({
       day,
       start_time: startTime,
       end_time: endTime,
       teacher_id: teacherId,
       classroom_id: classroomId,
     });
+
+    // Reset everything to empty after adding
+    setDay("");
+    setStartTime("");
+    setEndTime("");
+    setTeacherId("");
+    setClassroomId("");
   };
 
   return (
     <form
-      onSubmit={handleUpdate}
+      onSubmit={handleSubmit}
       className="space-y-4 max-w-md mx-auto p-6 bg-white rounded-lg shadow"
     >
       <div>
         <Label>Day</Label>
-        <Input value={day} onChange={(e) => setDay(e.target.value)} />
+        <Select value={day} onValueChange={setDay}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a day" />
+          </SelectTrigger>
+          <SelectContent>
+            {DAYS.map((d) => (
+              <SelectItem key={d} value={d}>
+                {d}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -134,7 +159,7 @@ export default function TeacherTimeTable({
       </div>
 
       <Button type="submit" disabled={loading}>
-        {loading ? "Updating..." : "Update Slot"}
+        {loading ? "Adding..." : "Add Time Slot"}
       </Button>
     </form>
   );

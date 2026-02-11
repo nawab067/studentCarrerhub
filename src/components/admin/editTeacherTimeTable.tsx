@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ interface Classroom {
   name: string;
 }
 
-interface TimeSlot {
+export interface SlotData {
   day: string;
   start_time: string;
   end_time: string;
@@ -30,40 +30,53 @@ interface TimeSlot {
   classroom_id: string;
 }
 
-interface TimetableFormProps {
+interface Props {
   teachers: Teacher[];
   classrooms: Classroom[];
-  onSubmit: (data: TimeSlot) => void;
+  slotData: SlotData;
+  onUpdate: (data: SlotData) => void;
   loading?: boolean;
 }
 
-export default function TeacherTimeTableupdate({
+export default function TeacherTimeTableUpdate({
   teachers,
   classrooms,
-  onSubmit,
+  slotData,
+  onUpdate,
   loading = false,
-}: TimetableFormProps) {
-  const [day, setDay] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [teacherId, setTeacherId] = useState("");
-  const [classroomId, setClassroomId] = useState("");
+}: Props) {
 
+
+  // form state
+  const [formData, setFormData] = useState<SlotData>({
+    day: "",
+    start_time: "",
+    end_time: "",
+    teacher_id: "",
+    classroom_id: "",
+  });
+
+  // ✅ update form when slotData arrives from API
+  useEffect(() => {
+    if (!slotData) return;
+    setFormData(slotData);
+  }, [slotData]);
+
+  // ✅ handle input/select change
+  const handleChange = (
+    key: keyof SlotData,
+    value: string
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  // submit form
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!day || !startTime || !endTime || !teacherId || !classroomId) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    onSubmit({
-      day,
-      start_time: startTime,
-      end_time: endTime,
-      teacher_id: teacherId,
-      classroom_id: classroomId,
-    });
+    onUpdate(formData);
   };
 
   return (
@@ -75,9 +88,10 @@ export default function TeacherTimeTableupdate({
       <div>
         <Label>Day</Label>
         <Input
-          placeholder="Monday"
-          value={day}
-          onChange={(e) => setDay(e.target.value)}
+          value={formData.day}
+          onChange={(e) =>
+            handleChange("day", e.target.value)
+          }
         />
       </div>
 
@@ -86,8 +100,10 @@ export default function TeacherTimeTableupdate({
         <Label>Start Time</Label>
         <Input
           type="time"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
+          value={formData.start_time}
+          onChange={(e) =>
+            handleChange("start_time", e.target.value)
+          }
         />
       </div>
 
@@ -96,69 +112,61 @@ export default function TeacherTimeTableupdate({
         <Label>End Time</Label>
         <Input
           type="time"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
+          value={formData.end_time}
+          onChange={(e) =>
+            handleChange("end_time", e.target.value)
+          }
         />
       </div>
 
       {/* Teacher */}
       <div>
         <Label>Teacher</Label>
-        <Select value={teacherId} onValueChange={setTeacherId}>
+        <Select
+          key={formData.teacher_id}   // ⭐ important
+          value={formData.teacher_id || ""}
+          onValueChange={(value) =>
+            handleChange("teacher_id", value)
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select teacher" />
           </SelectTrigger>
           <SelectContent>
-            {teachers.length > 0 ? (
-              teachers.map((teacher) => (
-                <SelectItem
-                  key={`teacher-${teacher.id}`}
-                  value={teacher.id}
-                >
-                  {teacher.name}
-                </SelectItem>
-              ))
-            ) : (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
-                No teachers found
-              </div>
-            )}
+            {teachers.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
       {/* Classroom */}
-      {/* Classroom */}
-<div>
-  <Label>Classroom</Label>
-  <Select value={classroomId} onValueChange={setClassroomId}>
-    <SelectTrigger>
-      <SelectValue placeholder="Select classroom" />
-    </SelectTrigger>
-    <SelectContent>
-      {classrooms.length > 0 ? (
-        classrooms.map((room) => (
-          <SelectItem
-            key={`classroom-${room.id}`}
-            value={String(room.id)}   // ✅ MUST be string
+      <div>
+        <Label>Classroom</Label>
+        <Select
+            key={formData.classroom_id}
+            value={formData.classroom_id || ""}
+            onValueChange={(value) =>
+              handleChange("classroom_id", value)
+            }
           >
-            {room.name}               {/* ✅ render ONCE */}
-          </SelectItem>
-        ))
-      ) : (
-        <div className="px-3 py-2 text-sm text-muted-foreground">
-          No classrooms found
-        </div>
-      )}
-    </SelectContent>
-  </Select>
-</div>
+          <SelectTrigger>
+            <SelectValue placeholder="Select classroom" />
+          </SelectTrigger>
+          <SelectContent>
+            {classrooms.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-
-      <Button type="submit"  disabled={loading}>
-        {loading ? "Saving..." : "Update This slot"}
-       
-        
+      <Button type="submit" disabled={loading}>
+        {loading ? "Updating..." : "Update Time Slot"}
       </Button>
     </form>
   );

@@ -42,6 +42,7 @@ export default function LoginPage() {
 
       if (user.role === "ADMIN") {
         localStorage.setItem("adminId", user._id); 
+        localStorage.setItem("userEmail", user.email);
         router.push("/admin/dashboard");
       }
       if (user.role === "STUDENT") {

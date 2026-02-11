@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
@@ -88,8 +88,31 @@ const navigationItems = [
 export function AdminSidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const [adminId, setAdminId] = useState<string | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+   const [userEmail, setUserEmail] = useState<string | null>(null);
+   const [mounted, setMounted] = useState(false);
+
+   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+ 
+
+    useEffect(() => {
+  setAdminId(localStorage.getItem("adminId"));
+  const storedEmail = localStorage.getItem("userEmail");
+  console.log(storedEmail);
+  if (storedEmail) {
+    setUserEmail(storedEmail);
+  }
+}, []);
+
+ if (!mounted) {
+    return null;
+  }
+  
 
   return (
     <>
@@ -352,8 +375,9 @@ export function AdminSidebar() {
                       <div className="flex flex-col flex-1 min-w-0 text-left">
                         <span className="text-sm font-semibold truncate">Admin User</span>
                         <span className="text-xs text-muted-foreground truncate">
-                          admin@example.com
-                        </span>
+                              admin@example.com
+                            </span>
+
                       </div>
                       <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>

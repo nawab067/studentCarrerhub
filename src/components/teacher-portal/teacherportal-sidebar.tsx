@@ -68,6 +68,11 @@ export default function TeacherPortalSidebar() {
       href: `/teacherportal/Assignments/${teacherId}`,
       icon: BookOpen,
     },
+    {
+      title: "Time Table ",
+      href: `/teacherportal/Timetable/${teacherId}`,
+      icon: BookOpen,
+    },
     teacherId && {
       title: "Classes",
       href: `/teacherportal/teacherclass/${teacherId}`,
