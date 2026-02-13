@@ -36,6 +36,7 @@ export default function LoginPage() {
       if (user.role === "TEACHER") {
        
         localStorage.setItem("teacherId", String(user._id));
+        localStorage.setItem("userEmail", user.email);
 
         router.push(`/teacherportal/dashboard/${user._id}`);
       }

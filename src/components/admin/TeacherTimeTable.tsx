@@ -27,6 +27,8 @@ export interface SlotData {
   start_time: string;
   end_time: string;
   teacher_id: string;
+  roomno?:string;
+  date?:string;
   classroom_id: string;
 }
 
@@ -57,8 +59,10 @@ export default function AddTimeSlotForm({
   const [day, setDay] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const[date,setDate]=useState("");
   const [teacherId, setTeacherId] = useState("");
   const [classroomId, setClassroomId] = useState("");
+  const[roomname,setRoomname]=useState("");
 
   // Set first teacher/classroom dynamically if not selected
  
@@ -123,6 +127,22 @@ export default function AddTimeSlotForm({
           type="time"
           value={endTime}
           onChange={(e) => setEndTime(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>Date</Label>
+        <Input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </div>
+      <div>
+        <Label>Room Name</Label>
+        <Input
+          type="text"
+          value={roomname}
+          onChange={(e) => setRoomname(e.target.value)}
         />
       </div>
 

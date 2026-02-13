@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -28,30 +28,40 @@ export function ChangePasswordDialog({
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+
+  useEffect(() => {
+      const email = localStorage.getItem("userEmail");
+      setEmail(email || "");
+    }, []);
+
   async function handleSubmit() {
-    if (!email || !newPassword) {
-      alert("Email and password are required");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await axios.put("http://127.0.0.1:8000/teacher/password/change", {
-        email: email,
-        new_password: newPassword, // ✅ MATCHES BACKEND
-      });
-
-      onOpenChange(false);
-      setEmail("");
-      setNewPassword("");
-    } catch (error) {
-      console.error("Password change failed:", error);
-      alert("Failed to change password");
-    } finally {
-      setLoading(false);
-    }
+  if (!email || !newPassword) {
+    alert("Email and password are required");
+    return;
   }
+
+  try {
+    setLoading(true);
+
+    await axios.put("http://127.0.0.1:8000/teacher/password/change", {
+      email: email,
+      new_password: newPassword,
+    });
+
+    onOpenChange(false);
+    setNewPassword("");
+
+    // ✅ Auto reload page
+    window.location.reload();
+
+  } catch (error) {
+    console.error("Password change failed:", error);
+    alert("Failed to change password");
+  } finally {
+    setLoading(false);
+  }
+}
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,6 +86,7 @@ export function ChangePasswordDialog({
                 placeholder="teacher@example.com"
                 className="pl-10"
                 value={email}
+                disabled
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
