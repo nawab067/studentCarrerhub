@@ -72,6 +72,8 @@ export default function TeacherTimeTableEdit() {
     end_time: formatTime(slot.end_time),
     teacher_id: String(slot.teacher_id ?? ""),
     classroom_id: String(slot.classroom_id ?? ""),
+    roomno: slot.roomno ?? "",
+    date: slot.date ?? "",
   });
 
   setLoading(false);

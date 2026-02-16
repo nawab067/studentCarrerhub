@@ -28,6 +28,8 @@ export interface SlotData {
   end_time: string;
   teacher_id: string;
   classroom_id: string;
+  roomno?: string;
+  date?: string;  
 }
 
 interface Props {
@@ -54,6 +56,8 @@ export default function TeacherTimeTableUpdate({
     end_time: "",
     teacher_id: "",
     classroom_id: "",
+    roomno: "",
+    date: "",
   });
 
   // ✅ update form when slotData arrives from API
@@ -91,6 +95,27 @@ export default function TeacherTimeTableUpdate({
           value={formData.day}
           onChange={(e) =>
             handleChange("day", e.target.value)
+          }
+        />
+      </div>
+      <div>
+        <Label>Room No</Label>
+        <Input
+          value={formData.roomno}
+          onChange={(e) =>
+            handleChange("roomno", e.target.value)
+          }
+        />
+      </div>
+
+      {/* Date */}
+      <div>
+        <Label>Date</Label>
+        <Input
+          type="date"
+          value={formData.date}
+          onChange={(e) =>
+            handleChange("date", e.target.value)
           }
         />
       </div>

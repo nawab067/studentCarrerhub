@@ -299,13 +299,8 @@ export default function TeacherTimeTable() {
     setSheetOpen(true);
   };
 
-  // Days to show (filter if activeDay selected)
   const visibleDays = activeDay ? [activeDay] : DAYS;
-
-  // Slots grouped by day
-  const slotsByDay = (day: string) =>
-    teacherTimeTable.filter(s => s.day === day);
-
+  const slotsByDay = (day: string) => teacherTimeTable.filter(s => s.day === day);
   const activeDays = DAYS.filter(d => slotsByDay(d).length > 0);
 
   return (
@@ -332,7 +327,6 @@ export default function TeacherTimeTable() {
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
-              {/* View toggle */}
               <div className="flex items-center rounded-lg border bg-white dark:bg-gray-900 p-1 shadow-sm gap-0.5">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -363,30 +357,10 @@ export default function TeacherTimeTable() {
 
           {/* ── Stats ── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatChip
-              icon={<CalendarDays className="h-5 w-5 text-indigo-500" />}
-              label="Total Slots"
-              value={teacherTimeTable.length}
-              accent="border-indigo-100 dark:border-indigo-900/50"
-            />
-            <StatChip
-              icon={<User className="h-5 w-5 text-emerald-500" />}
-              label="Teachers"
-              value={new Set(teacherTimeTable.map(s => s.teacher_id)).size}
-              accent="border-emerald-100 dark:border-emerald-900/50"
-            />
-            <StatChip
-              icon={<DoorOpen className="h-5 w-5 text-violet-500" />}
-              label="Classrooms"
-              value={new Set(teacherTimeTable.map(s => s.classroom_id)).size}
-              accent="border-violet-100 dark:border-violet-900/50"
-            />
-            <StatChip
-              icon={<CalendarDays className="h-5 w-5 text-amber-500" />}
-              label="Active Days"
-              value={activeDays.length}
-              accent="border-amber-100 dark:border-amber-900/50"
-            />
+            <StatChip icon={<CalendarDays className="h-5 w-5 text-indigo-500" />} label="Total Slots" value={teacherTimeTable.length} accent="border-indigo-100 dark:border-indigo-900/50" />
+            <StatChip icon={<User className="h-5 w-5 text-emerald-500" />} label="Teachers" value={new Set(teacherTimeTable.map(s => s.teacher_id)).size} accent="border-emerald-100 dark:border-emerald-900/50" />
+            <StatChip icon={<DoorOpen className="h-5 w-5 text-violet-500" />} label="Classrooms" value={new Set(teacherTimeTable.map(s => s.classroom_id)).size} accent="border-violet-100 dark:border-violet-900/50" />
+            <StatChip icon={<CalendarDays className="h-5 w-5 text-amber-500" />} label="Active Days" value={activeDays.length} accent="border-amber-100 dark:border-amber-900/50" />
           </div>
 
           {/* ── Day filter pills ── */}
@@ -463,7 +437,6 @@ export default function TeacherTimeTable() {
 
                 return (
                   <div key={day} className="flex flex-col gap-2">
-                    {/* Day header */}
                     <div className={cn(
                       'flex items-center justify-between px-3 py-2 rounded-xl',
                       cfg.bg, cfg.border, 'border'
@@ -480,19 +453,13 @@ export default function TeacherTimeTable() {
                       </span>
                     </div>
 
-                    {/* Slot cards */}
                     {daySlots.length === 0 ? (
                       <div className={cn(
                         'flex flex-col items-center justify-center py-6 rounded-xl border-2 border-dashed gap-2',
                         'border-gray-200 dark:border-gray-800 text-muted-foreground'
                       )}>
                         <span className="text-xs">No classes</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 text-xs gap-1 hover:text-indigo-600"
-                          onClick={handleAdd}
-                        >
+                        <Button variant="ghost" size="sm" className="h-6 text-xs gap-1 hover:text-indigo-600" onClick={handleAdd}>
                           <Plus className="h-3 w-3" />Add
                         </Button>
                       </div>
@@ -523,7 +490,6 @@ export default function TeacherTimeTable() {
                   const cfg = DAY_CONFIG[day];
                   return (
                     <div key={day}>
-                      {/* Day separator */}
                       <div className={cn('flex items-center gap-2 px-4 py-2.5', cfg.bg)}>
                         <span className={cn('h-2 w-2 rounded-full shrink-0', cfg.dot)} />
                         <span className={cn('text-xs font-bold uppercase tracking-wider', cfg.accent)}>{day}</span>
@@ -551,52 +517,66 @@ export default function TeacherTimeTable() {
 
       {/* ── Slot Detail Sheet ── */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-[360px] sm:w-[400px]">
+        {/*
+          KEY FIX: SheetContent is now a flex column.
+          - ScrollArea takes all available space (flex-1) so the detail rows scroll.
+          - The Edit/Delete button row is pinned at the bottom (shrink-0) and is
+            always visible regardless of how many detail rows are shown.
+        */}
+        <SheetContent side="right" className="w-[360px] sm:w-[400px] flex flex-col p-0">
           {selectedSlot && (() => {
             const cfg = DAY_CONFIG[selectedSlot.day] ?? DAY_CONFIG['Monday'];
             return (
               <>
-                <SheetHeader className="pb-4">
-                  <div className={cn('inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2', cfg.badge)}>
-                    <span className={cn('h-2 w-2 rounded-full', cfg.dot)} />
-                    {selectedSlot.day}
-                  </div>
-                  <SheetTitle className="text-xl">Slot Details</SheetTitle>
-                  <SheetDescription>Full information for this time slot</SheetDescription>
-                </SheetHeader>
-
-                <div className="space-y-4 mt-2">
-                  {[
-                    { label: 'Time', icon: <Clock className="h-4 w-4" />, value: `${selectedSlot.start_time} – ${selectedSlot.end_time}` },
-                    { label: 'Teacher', icon: <User className="h-4 w-4" />, value: selectedSlot.teacher_name ?? 'Unknown' },
-                    { label: 'Classroom', icon: <DoorOpen className="h-4 w-4" />, value: selectedSlot.classroom_name ?? 'Unknown' },
-                    ...(selectedSlot.roomno ? [{ label: 'Room No.', icon: <DoorOpen className="h-4 w-4" />, value: selectedSlot.roomno }] : []),
-                    ...(selectedSlot.date ? [{ label: 'Date', icon: <CalendarDays className="h-4 w-4" />, value: selectedSlot.date }] : []),
-                  ].map(({ label, icon, value }) => (
-                    <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                      <div className="p-1.5 rounded-md bg-background shadow-sm text-muted-foreground">{icon}</div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
-                        <p className="text-sm font-semibold text-foreground truncate">{value}</p>
+                {/* Scrollable header + detail rows */}
+                <ScrollArea className="flex-1 min-h-0">
+                  <div className="px-6 pt-6 pb-2">
+                    <SheetHeader className="pb-4">
+                      <div className={cn('inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2', cfg.badge)}>
+                        <span className={cn('h-2 w-2 rounded-full', cfg.dot)} />
+                        {selectedSlot.day}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                      <SheetTitle className="text-xl">Slot Details</SheetTitle>
+                      <SheetDescription>Full information for this time slot</SheetDescription>
+                    </SheetHeader>
 
-                <div className="flex gap-2 mt-8">
-                  <Button
-                    onClick={() => { handleEdit(selectedSlot); setSheetOpen(false); }}
-                    className="flex-1 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => { openDeleteDialog(selectedSlot._id); setSheetOpen(false); }}
-                    className="flex-1 gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300 dark:hover:bg-red-950"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />Delete
-                  </Button>
+                    <div className="space-y-4 mt-2">
+                      {[
+                        { label: 'Time',      icon: <Clock className="h-4 w-4" />,      value: `${selectedSlot.start_time} – ${selectedSlot.end_time}` },
+                        { label: 'Teacher',   icon: <User className="h-4 w-4" />,       value: selectedSlot.teacher_name ?? 'Unknown' },
+                        { label: 'Classroom', icon: <DoorOpen className="h-4 w-4" />,   value: selectedSlot.classroom_name ?? 'Unknown' },
+                        ...(selectedSlot.roomno ? [{ label: 'Room No.', icon: <DoorOpen className="h-4 w-4" />, value: selectedSlot.roomno }] : []),
+                        ...(selectedSlot.date   ? [{ label: 'Date',     icon: <CalendarDays className="h-4 w-4" />, value: selectedSlot.date }] : []),
+                      ].map(({ label, icon, value }) => (
+                        <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                          <div className="p-1.5 rounded-md bg-background shadow-sm text-muted-foreground">{icon}</div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
+                            <p className="text-sm font-semibold text-foreground truncate">{value}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </ScrollArea>
+
+                {/* Edit / Delete — always pinned at the bottom */}
+                <div className="shrink-0 px-6 py-4 border-t bg-background">
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => { handleEdit(selectedSlot); setSheetOpen(false); }}
+                      className="flex-1 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => { openDeleteDialog(selectedSlot._id); setSheetOpen(false); }}
+                      className="flex-1 gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300 dark:hover:bg-red-950"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />Delete
+                    </Button>
+                  </div>
                 </div>
               </>
             );
