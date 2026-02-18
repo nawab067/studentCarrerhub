@@ -1,162 +1,229 @@
 'use client';
 
-import StudentPortalSidebar from '@/components/student-portal/student-sidebar';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+
+import StudentPortalSidebar from '@/components/student-portal/student-sidebar';
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-/* =======================
-   Types (match API)
-======================= */
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-interface Classroom {
-  _id: string;
-  classroom_name: string;
-  teacherId: string;
-}
+import { Clock, User, School } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
+/* ------------------ Types ------------------ */
 interface Teacher {
   _id: string;
   name: string;
 }
 
-interface ClassroomWithTeacher{
+interface Classroom {
   _id: string;
   classroom_name: string;
-  teacherId: string;
-  teacherName: Teacher['name'];
 }
 
-/* =======================
-   Component
-======================= */
+interface TimeTableSlot {
+  _id: string;
+  day: string;
+  start_time: string;
+  end_time: string;
+  teacher_id: string | Teacher;
+  classroom_id: string | Classroom;
+  date?: string;
+  roomno?: string;
+}
 
-export default function StudentDashboardPage() {
+/* ------------------ Component ------------------ */
+export default function StudentClassesPage() {
   const router = useRouter();
 
   const [studentId, setStudentId] = useState<string | null>(null);
-  const [classes, setClasses] = useState<ClassroomWithTeacher[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeTableSlots, setTimeTableSlots] = useState<TimeTableSlot[]>([]);
 
-  /* =======================
-     Get studentId
-  ======================= */
+  /* ---------- Auth ---------- */
   useEffect(() => {
-    const id = localStorage.getItem('studentId');
-
-    if (!id) {
+    const storedStudentId = localStorage.getItem('studentId');
+    if (!storedStudentId) {
       router.replace('/login');
       return;
     }
-
-    setStudentId(id);
+    setStudentId(storedStudentId);
   }, [router]);
 
-  /* =======================
-     Fetch classes + teachers
-  ======================= */
+  /* ---------- Fetch Timetable ---------- */
   useEffect(() => {
     if (!studentId) return;
 
-    const fetchData = async () => {
+    const fetchTimetable = async () => {
       try {
         setLoading(true);
+        const response = await axios.get(
+          `http://127.0.0.1:8000/classes/timetable/${studentId}`
+        );
 
-        // 1️⃣ Fetch classes
-        const classRes = await axios.get<
-          Classroom | Classroom[]
-        >(`http://127.0.0.1:8000/classes/student/${studentId}`);
+        const slots = response.data;
 
-        const classArray: Classroom[] = Array.isArray(classRes.data)
-          ? classRes.data
-          : [classRes.data];
+        const updatedSlots = await Promise.all(
+          slots.map(async (slot: any) => {
+            let teacherName = "Unknown";
+            let classroomName = "Unknown";
 
-        // 2️⃣ Fetch teachers for each class
-        const classesWithTeachers: ClassroomWithTeacher[] = await Promise.all(
-          classArray.map(async (cls) => {
             try {
-              const teacherRes = await axios.get<
-                Teacher | Teacher[]
-              >(`http://127.0.0.1:8000/classes/teacher/${cls.teacherId}`);
-              console.log(teacherRes.data);
+              const t = await axios.get(
+                `http://127.0.0.1:8000/classes/teacher/${slot.teacher_id}`
+              );
+              teacherName = t.data.name;
+            } catch {}
 
-              const teacher = Array.isArray(teacherRes.data)
-                ? teacherRes.data[0]
-                : teacherRes.data;
+            try {
+              const c = await axios.get(
+                `http://127.0.0.1:8000/classes/classroom/${slot.classroom_id}`
+              );
+              classroomName = c.data.classroom_name;
+            } catch {}
 
-              return {
-                ...cls,
-                teacherName: teacher?.name ?? 'Unknown',
-              };
-            } catch {
-              return {
-                ...cls,
-                teacherName: 'Unknown',
-              };
-            }
+            return {
+              ...slot,
+              teacher_id: { _id: slot.teacher_id, name: teacherName },
+              classroom_id: {
+                _id: slot.classroom_id,
+                classroom_name: classroomName,
+              },
+            };
           })
         );
 
-        setClasses(classesWithTeachers);
-      } catch (error) {
-        console.error('Fetch error:', error);
-        setClasses([]);
+        setTimeTableSlots(updatedSlots);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchTimetable();
   }, [studentId]);
 
-  /* =======================
-     UI
-  ======================= */
-
+  /* ------------------ UI ------------------ */
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-muted/40">
+      {/* Sidebar (fixed width) */}
       <StudentPortalSidebar />
 
-      <main className="p-6 md:ml-64">
-        <h1 className="text-2xl font-bold">Student Classes</h1>
-        <p className="mt-2 text-gray-600">
-          Welcome to your assigned classes
-        </p>
+      {/* Main Content */}
+      <main className="ml-64 p-6 lg:p-10"> {/* 👈 KEY FIX */}
+        <div className="mb-8 space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">
+            Student Classes
+          </h1>
+          <p className="text-muted-foreground">
+            Weekly timetable overview
+          </p>
+        </div>
 
-        {loading ? (
-          <p className="mt-6 text-gray-500">Loading classes...</p>
-        ) : (
-          <div className="grid gap-6 mt-6 sm:grid-cols-2 lg:grid-cols-3">
-            {classes.map((cls) => (
-              <Card
-                key={cls._id}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardHeader>
-                  <CardTitle className="text-lg capitalize">
-                    {cls.classroom_name}
-                  </CardTitle>
-                </CardHeader>
+        <Card className="rounded-2xl shadow-md">
+          <CardHeader>
+            <CardTitle className="text-xl">
+              📅 Weekly Class Timetable
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              View your scheduled classes
+            </p>
+          </CardHeader>
 
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Teacher Name
-                  </p>
-                  <p className="font-medium">
-                    {cls.teacherName}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+          <Separator />
+
+          <CardContent className="pt-6">
+            {loading ? (
+              <div className="py-16 text-center text-muted-foreground">
+                Loading timetable...
+              </div>
+            ) : timeTableSlots.length === 0 ? (
+              <div className="py-16 text-center text-muted-foreground">
+                No timetable available
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-xl border">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Day</TableHead>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Teacher</TableHead>
+                      <TableHead>Classes</TableHead>
+                      <TableHead>Room #</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {timeTableSlots.map((slot) => (
+              <TableRow key={slot._id} className="hover:bg-muted/40">
+  {/* Day */}
+  <TableCell>
+    <Badge variant="outline">{slot.day}</Badge>
+  </TableCell>
+
+  {/* Time */}
+  <TableCell className="flex items-center gap-2">
+    <Clock className="h-4 w-4 text-muted-foreground" />
+    {slot.start_time} – {slot.end_time}
+  </TableCell>
+
+  {/* Date */}
+  <TableCell>
+    {slot.date ?? "—"}
+  </TableCell>
+
+  {/* Teacher */}
+  <TableCell>
+    <div className="flex items-center gap-2 font-medium">
+      <User className="h-4 w-4 text-muted-foreground" />
+      {typeof slot.teacher_id === "object"
+        ? slot.teacher_id.name
+        : "—"}
+    </div>
+  </TableCell>
+
+  {/* Classroom */}
+  <TableCell>
+    <div className="flex items-center gap-2">
+      <School className="h-4 w-4 text-muted-foreground" />
+      {typeof slot.classroom_id === "object"
+        ? slot.classroom_id.classroom_name
+        : "—"}
+    </div>
+  </TableCell>
+
+  {/* Room # */}
+  <TableCell className="font-medium">
+    {slot.roomno ?? "—"}
+  </TableCell>
+</TableRow>
+
+
+
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
