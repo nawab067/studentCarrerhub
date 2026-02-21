@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -307,6 +308,7 @@ export default function ClassroomPage() {
               
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
+                <ScrollArea className="h-[500px] w-full">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 border-b-2">
@@ -419,6 +421,7 @@ export default function ClassroomPage() {
                       ))}
                     </motion.tbody>
                   </Table>
+                  </ScrollArea>
                 </div>
 
                 {classrooms.length === 0 && (

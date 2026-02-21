@@ -30,9 +30,9 @@ export default function ClassroomAddPageContainer() {
       await axios.post(
     "http://127.0.0.1:8000/classroom_Added",
     {
-        classroom_name: data.classroom_name, // matches backend
-        teacherId: data.teacherId,           // matches backend exactly
-        students: []                         // required by backend
+        classroom_name: data.classroom_name, 
+        teacherId: data.teacherId,           
+        students: []                       
     },
     {
         headers: { "Content-Type": "application/json" },
