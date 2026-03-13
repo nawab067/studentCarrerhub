@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ChangePasswordDialog } from "@/components/student-portal/change-password";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -42,6 +43,8 @@ export default function StudentPortalSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [studentName, setStudentName] = useState<string>("");
 
   useEffect(() => {
   setStudentId(localStorage.getItem("studentId"));
@@ -67,9 +70,28 @@ export default function StudentPortalSidebar() {
     { title: "Settings", href: "/studentPortal/settings", icon: Settings },
   ];
 
+  async function get_student_name_By_userId() {
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://127.0.0.1:8000/classes/student/user/${studentId}`);
+      setStudentName(response.data.name);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching student name:", error);
+      setLoading(false);
+      
+    }finally {
+      setLoading(false);
+    }  
+  }
+
+  useEffect(() => {
+    get_student_name_By_userId();
+  },[studentId]
+);
+
   return (
     <>
-      {/* Mobile Toggle */}
       <Button
         variant="ghost"
         size="icon"
@@ -142,7 +164,7 @@ export default function StudentPortalSidebar() {
                 {!isCollapsed && (
                   <>
                     <div className="flex flex-col text-sm">
-                      <span className="font-medium">Student User</span>
+                      <span className="font-medium">{studentName}</span>
                       <span className="text-xs text-emerald-200">
                         {userEmail || "student@example.com"}
 

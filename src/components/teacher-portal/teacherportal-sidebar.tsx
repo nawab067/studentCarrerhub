@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -54,6 +55,8 @@ export default function TeacherPortalSidebar() {
   const[email, setEmail] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [teacherName, setTeacherName] = useState("");
 
   useEffect(() => {
     const id = localStorage.getItem("teacherId");
@@ -63,10 +66,10 @@ export default function TeacherPortalSidebar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("teacherId"); 
-    localStorage.removeItem("userEmail"); 
-    router.replace("/login");
-  };
+  localStorage.removeItem("teacherId"); 
+  localStorage.removeItem("userEmail"); 
+  window.location.href = "/login";
+};
 
   const teacherNav = [
     {
@@ -118,6 +121,24 @@ export default function TeacherPortalSidebar() {
     badge: string | null;
   }[];
 
+  async function get_name_of_teacher_Buy_userId(){
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://127.0.0.1:8000/classes/teacher/user/${teacherId}`);
+      console.log(response.data);
+      setTeacherName(response.data.name);
+
+    } catch (error) {
+      console.error("Error fetching teacher name:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    if (teacherId) {
+      get_name_of_teacher_Buy_userId();
+    }
+  }, [teacherId]);
   const NavItem = ({ item }: { item: typeof teacherNav[0] }) => {
     const Icon = item.icon;
     const isActive = pathname.startsWith(item.href);
@@ -265,7 +286,7 @@ export default function TeacherPortalSidebar() {
 
                   {!isCollapsed && (
                     <div className="flex flex-col flex-1 text-left">
-                      <span className="text-sm font-medium">Teacher User</span>
+                      <span className="text-sm font-medium">{teacherName}</span>
                       <span className="text-xs text-white/70 truncate">
                         {email}
                       </span>
