@@ -48,15 +48,11 @@ export default function StudentPortalSidebar() {
 
   useEffect(() => {
   setStudentId(localStorage.getItem("studentId"));
-  const storedEmail = localStorage.getItem("userEmail");
-  if (storedEmail) {
-    setUserEmail(storedEmail);
-  }
 }, []);
 
 
   const handleLogout = () => {
-  localStorage.clear();
+  localStorage.removeItem("studentId");
   router.replace("/login");
 };
 
@@ -71,24 +67,42 @@ export default function StudentPortalSidebar() {
   ];
 
   async function get_student_name_By_userId() {
-    try {
-      setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8000/classes/student/user/${studentId}`);
-      setStudentName(response.data.name);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching student name:", error);
-      setLoading(false);
-      
-    }finally {
-      setLoading(false);
-    }  
-  }
+  if (!studentId) return;
 
-  useEffect(() => {
-    get_student_name_By_userId();
-  },[studentId]
-);
+  try {
+    setLoading(true);
+    const response = await axios.get(
+      `http://127.0.0.1:8000/classes/student/user/${studentId}`
+    );
+
+    setStudentName(response.data.name);
+  } catch (error) {
+    console.error("Error fetching student name:", error);
+  } finally {
+    setLoading(false);
+  }
+}
+useEffect(() => {
+  get_student_name_By_userId();
+}, [studentId]);
+
+async function get_Student_email_Byuserid() {
+  if (!studentId) return;
+  try {
+    setLoading(true);
+    const response = await axios.get(`http://127.0.0.1:8000/classes/student/email/${studentId}`);
+    setUserEmail(response.data.email);
+  } catch (error) {
+    console.error("Error fetching student email:", error);
+  } finally {
+    setLoading(false);
+  }
+  
+}
+
+useEffect(() => {
+  get_Student_email_Byuserid();
+}, [studentId]);
 
   return (
     <>

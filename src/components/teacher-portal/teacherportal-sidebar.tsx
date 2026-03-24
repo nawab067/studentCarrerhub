@@ -60,15 +60,12 @@ export default function TeacherPortalSidebar() {
 
   useEffect(() => {
     const id = localStorage.getItem("teacherId");
-    const email = localStorage.getItem("userEmail");
     setTeacherId(id);
-    setEmail(email || "");
   }, []);
 
   const handleLogout = () => {
   localStorage.removeItem("teacherId"); 
-  localStorage.removeItem("userEmail"); 
-  window.location.href = "/login";
+  router.replace("/login");
 };
 
   const teacherNav = [
@@ -139,6 +136,25 @@ export default function TeacherPortalSidebar() {
       get_name_of_teacher_Buy_userId();
     }
   }, [teacherId]);
+
+  async function get_email_of_teacher_Buy_userId(){
+    try {
+      setLoading(true);
+      const response=  await axios.get(`http://127.0.0.1:8000/classes/teacher/email/${teacherId}`);
+      console.log(response.data);
+      setEmail(response.data.email);
+    } catch (error) {
+      console.error("Error fetching teacher email:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    if (teacherId) {
+      get_email_of_teacher_Buy_userId();
+    }
+  }, [teacherId]);
+
   const NavItem = ({ item }: { item: typeof teacherNav[0] }) => {
     const Icon = item.icon;
     const isActive = pathname.startsWith(item.href);

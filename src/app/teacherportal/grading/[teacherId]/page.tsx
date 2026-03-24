@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import axios from "axios";
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -16,11 +16,20 @@ export interface AssignedClass {
   teacherId: string;
 }
 
+export interface Assessment {
+  _id: string
+  classId: string
+  teacherId: string
+  name: string
+  description: string
+}
+
 export default function TeacherClassesPage() {
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [assignedClasses, setAssignedClasses] = useState<AssignedClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [assessment, setAssessment] = useState<Assessment[]>([]);
   const router = useRouter();
 
   // ✅ 1️⃣ READ teacherId from localStorage
@@ -65,9 +74,11 @@ export default function TeacherClassesPage() {
     fetchClasses();
   }, [teacherId]);
 
-  const handleViewAttendance = (cls: AssignedClass) => {
-    router.push(`/teacherportal/attendence/AttendenceSheet/${cls._id}`);
-  };
+
+
+ const handleViewAssessment = (classroomID: string) => {
+  router.push(`/teacherportal/grading/SeeAssesment/${classroomID}`);
+};
 
   const getClassColor = (index: number) => {
     const colors = [
@@ -198,71 +209,97 @@ export default function TeacherClassesPage() {
         )}
 
         {/* Classes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {assignedClasses.map((cls, index) => (
-            <Card
-              key={cls._id}
-              className="group bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1"
+        {/* Classes Grid */}
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  {assignedClasses.map((cls, index) => {
+
+    // find assessment that belongs to this class
+   const classAssessment = assessment.find(
+  (a) => a.classId === cls._id
+);
+    return (
+      <Card
+        key={cls._id}
+        className="group bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1"
+      >
+        {/* Gradient Header */}
+        <div className={`h-2 bg-gradient-to-r ${getClassColor(index)}`}></div>
+
+        <CardHeader className="pb-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <CardTitle className="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                {cls.classroom_name}
+              </CardTitle>
+
+              <Badge
+                variant="secondary"
+                className="bg-slate-100 text-slate-700 hover:bg-slate-200"
+              >
+                <BookOpen className="h-3 w-3 mr-1" />
+                Active Class
+              </Badge>
+            </div>
+
+            <div
+              className={`h-12 w-12 rounded-xl bg-gradient-to-br ${getClassColor(
+                index
+              )} flex items-center justify-center shadow-md`}
             >
-              {/* Gradient Header */}
-              <div className={`h-2 bg-gradient-to-r ${getClassColor(index)}`}></div>
+              <BookOpen className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </CardHeader>
 
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
-                      {cls.classroom_name}
-                    </CardTitle>
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200">
-                      <BookOpen className="h-3 w-3 mr-1" />
-                      Active Class
-                    </Badge>
-                  </div>
-                  <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${getClassColor(index)} flex items-center justify-center shadow-md`}>
-                    <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardHeader>
+        <CardContent className="space-y-4">
 
-              <CardContent className="space-y-4">
-                {/* Student Count */}
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-600">Total Students</p>
-                      <p className="text-xl font-bold text-slate-800">{cls.students.length}</p>
-                    </div>
-                  </div>
-                </div>
+          {/* Student Count */}
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
 
-                {/* Action Button */}
-                <Button
-                  onClick={() => handleViewAttendance(cls)}
-                  className={`w-full bg-gradient-to-r ${getClassColor(index)} hover:opacity-90 text-white font-medium py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 group/btn`}
-                >
-                  <Calendar className="h-5 w-5 mr-2" />
-                  view Grading Sheet
-                  <ArrowRight className="h-5 w-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
+              <div>
+                <p className="text-sm text-slate-600">Total Students</p>
+                <p className="text-xl font-bold text-slate-800">
+                  {cls.students.length}
+                </p>
+              </div>
+            </div>
+          </div>
 
-                {/* Additional Info */}
-                <div className="flex items-center justify-between text-sm text-slate-500 pt-2">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>Updated today</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                    <span>Active</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          {/* Action Button */}
+          <Button
+  // disabled={!classAssessment}
+  onClick={() => handleViewAssessment(cls._id)}
+  className={`w-full bg-gradient-to-r ${getClassColor(
+    index
+  )} hover:opacity-90 text-white font-medium py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 group/btn`}
+>
+  <Calendar className="h-5 w-5 mr-2" />
+  {classAssessment ? "View Grading Sheet" : "No Assessment"}
+  <ArrowRight className="h-5 w-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+</Button>
+
+          {/* Additional Info */}
+          <div className="flex items-center justify-between text-sm text-slate-500 pt-2">
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              <span>Updated today</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span>Active</span>
+            </div>
+          </div>
+
+        </CardContent>
+      </Card>
+    );
+  })}
+</div>
       </main>
     </div>
   );
