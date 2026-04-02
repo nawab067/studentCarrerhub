@@ -68,6 +68,10 @@ export default function TeacherPortalSidebar() {
   router.replace("/login");
 };
 
+const handleseeprofile = () => {
+  router.push(`/teacherportal/profile/${teacherId}`);
+};
+
   const teacherNav = [
     {
       title: "Dashboard",
@@ -332,7 +336,10 @@ export default function TeacherPortalSidebar() {
               
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={handleseeprofile}
+              >
                 <UserCircle className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>

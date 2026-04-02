@@ -34,13 +34,20 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
-export default function StudentPortalSidebar() {
+type SidebarProps = {
+  collapsed: boolean;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export default function StudentPortalSidebar({
+  collapsed,
+  setCollapsed,
+}: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [studentId, setStudentId] = useState<string | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -121,19 +128,19 @@ useEffect(() => {
           "fixed left-0 top-0 z-40 h-screen bg-emerald-900 text-white transition-all flex flex-col",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
-          isCollapsed ? "md:w-16" : "md:w-64"
+          collapsed ? "md:w-16" : "md:w-64"
         )}
       >
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-emerald-700 px-4">
-          {!isCollapsed && <span className="font-bold">Student Portal</span>}
+          {!collapsed && <span className="font-bold">Student Portal</span>}
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={() => setCollapsed(!collapsed)}
             className="hidden md:flex text-white"
           >
-            {isCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+            {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
           </Button>
         </div>
 
@@ -153,7 +160,7 @@ useEffect(() => {
                   )}
                 >
                   <Icon className="h-5 w-5" />
-                  {!isCollapsed && item.title}
+                  {!collapsed && item.title}
                 </Button>
               </Link>
             );
@@ -175,7 +182,7 @@ useEffect(() => {
                   <AvatarFallback>SP</AvatarFallback>
                 </Avatar>
 
-                {!isCollapsed && (
+                {!collapsed && (
                   <>
                     <div className="flex flex-col text-sm">
                       <span className="font-medium">{studentName}</span>

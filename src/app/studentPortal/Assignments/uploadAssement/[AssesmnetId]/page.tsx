@@ -41,6 +41,7 @@ export default function UploadAssesmentPage() {
   const [teacherName, setTeacherName] = useState('');
   const [classroomname, setClassroomName] = useState('');
   const [studentName, setStudentName] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -244,9 +245,13 @@ export default function UploadAssesmentPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <StudentPortalSidebar />
+      <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className="flex-1 md:ml-64 p-8">
+       <main
+            className={`p-6 lg:p-10 transition-all duration-300 ${
+              collapsed ? "ml-20" : "ml-64"
+            }`}
+          >
 
         {/* Header */}
 

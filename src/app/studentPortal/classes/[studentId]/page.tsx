@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType, type Dispatch, type SetStateAction } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
@@ -55,6 +55,7 @@ export default function StudentClassesPage() {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeTableSlots, setTimeTableSlots] = useState<TimeTableSlot[]>([]);
+  const [collapsed, setCollapsed] = useState(false);
 
   /* ---------- Auth ---------- */
   useEffect(() => {
@@ -122,10 +123,14 @@ export default function StudentClassesPage() {
   return (
     <div className="min-h-screen bg-muted/40">
       {/* Sidebar (fixed width) */}
-      <StudentPortalSidebar />
+      <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* Main Content */}
-      <main className="ml-64 p-6 lg:p-10"> {/* 👈 KEY FIX */}
+      <main
+            className={`p-6 lg:p-10 transition-all duration-300 ${
+              collapsed ? "ml-20" : "ml-64"
+            }`}
+          > {/* 👈 KEY FIX */}
         <div className="mb-8 space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">
             Student Classes

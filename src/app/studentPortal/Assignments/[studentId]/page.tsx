@@ -25,6 +25,7 @@ export default function StudentDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [classroomMap, setClassroomMap] = useState<Record<string, string>>({});
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const id = localStorage.getItem('studentId');
@@ -166,9 +167,13 @@ export default function StudentDashboardPage() {
 
     <div className="min-h-screen">
 
-      <StudentPortalSidebar />
+      <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className="p-6 md:ml-64">
+       <main
+            className={`p-6 lg:p-10 transition-all duration-300 ${
+              collapsed ? "ml-20" : "ml-64"
+            }`}
+          >
 
         <h1 className="text-2xl font-bold">
           Student Assignments
