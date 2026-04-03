@@ -401,7 +401,7 @@ export default function StudentDashboardPage() {
               </p>
               <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
                 <button
-                  onClick={() => router.push('/studentPortal/Assignments')}
+                  onClick={() => router.push(`/studentPortal/Assignments/${studentId}`)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     background: '#fff', color: '#4338ca',
@@ -416,7 +416,7 @@ export default function StudentDashboardPage() {
                   View Assignments
                 </button>
                 <button
-                  onClick={() => router.push('/studentPortal/classes')}
+                  onClick={() => router.push(`/studentPortal/classes/${studentId}`)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     background: 'rgba(255,255,255,0.12)',
