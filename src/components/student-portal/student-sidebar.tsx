@@ -124,8 +124,8 @@ useEffect(() => {
 
       {/* Sidebar */}
       <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-emerald-900 text-white transition-all flex flex-col",
+  className={cn(
+    "fixed left-0 top-0 z-40 h-screen bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 text-white transition-all flex flex-col",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
           collapsed ? "md:w-16" : "md:w-64"
@@ -155,8 +155,8 @@ useEffect(() => {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start gap-3 text-white hover:bg-emerald-800",
-                    isActive && "bg-emerald-800"
+                    "w-full justify-start gap-3 text-white hover:bg-indigo-700b ",
+                    isActive && "bg-indigo-700"
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -167,7 +167,7 @@ useEffect(() => {
           })}
         </ScrollArea>
 
-        <Separator className="bg-emerald-700" />
+        <Separator className="bg-indigo-700" />
 
         {/* Profile / Login Section */}
         <div className="mt-auto p-4">
@@ -175,7 +175,7 @@ useEffect(() => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 hover:bg-emerald-800"
+                className="w-full justify-start gap-3 hover:bg-indigo-700b"
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage />
