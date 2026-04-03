@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 import StudentPortalSidebar from '@/components/student-portal/student-sidebar';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { ClipboardList, ChevronRight, BookOpen, GraduationCap } from 'lucide-react';
+import {
+  ClipboardList,
+  BookOpen,
+  GraduationCap,
+  ArrowUpRight,
+  ChevronRight,
+} from 'lucide-react';
 
 interface Classroom {
   _id: string;
@@ -26,19 +29,14 @@ export default function StudentAttendancePage() {
 
   useEffect(() => {
     const id = localStorage.getItem('studentId');
-    if (!id) {
-      router.replace('/login');
-      return;
-    }
+    if (!id) { router.replace('/login'); return; }
     setStudentId(id);
     fetchClassrooms(id);
   }, []);
 
-  const fetchClassrooms = async (studentId: string) => {
+  const fetchClassrooms = async (id: string) => {
     try {
-      const res = await axios.get(
-        `http://127.0.0.1:8000/classes/student/${studentId}`
-      );
+      const res = await axios.get(`http://127.0.0.1:8000/classes/student/${id}`);
       setClassrooms(res.data);
     } catch (err) {
       console.error('Error fetching classrooms:', err);
@@ -47,212 +45,254 @@ export default function StudentAttendancePage() {
     }
   };
 
-  const accentColors = [
-    { iconBg: '#ede9fe', iconColor: '#7c3aed', dot: '#7c3aed', strip: '#7c3aed' },
-    { iconBg: '#dbeafe', iconColor: '#2563eb', dot: '#2563eb', strip: '#2563eb' },
-    { iconBg: '#d1fae5', iconColor: '#059669', dot: '#059669', strip: '#059669' },
-    { iconBg: '#fef3c7', iconColor: '#d97706', dot: '#d97706', strip: '#d97706' },
-    { iconBg: '#ffe4e6', iconColor: '#e11d48', dot: '#e11d48', strip: '#e11d48' },
-    { iconBg: '#e0f2fe', iconColor: '#0284c7', dot: '#0284c7', strip: '#0284c7' },
+  // Matches the subjectColors palette from assignments page
+  const subjectColors = [
+    { light: '#eef2ff', mid: '#818cf8', bar: 'linear-gradient(135deg,#6366f1,#818cf8)' },
+    { light: '#fdf4ff', mid: '#c084fc', bar: 'linear-gradient(135deg,#a855f7,#c084fc)' },
+    { light: '#ecfeff', mid: '#22d3ee', bar: 'linear-gradient(135deg,#06b6d4,#22d3ee)' },
+    { light: '#fff7ed', mid: '#fb923c', bar: 'linear-gradient(135deg,#f97316,#fb923c)' },
+    { light: '#f0fdf4', mid: '#4ade80', bar: 'linear-gradient(135deg,#22c55e,#4ade80)' },
+    { light: '#fff1f2', mid: '#fb7185', bar: 'linear-gradient(135deg,#f43f5e,#fb7185)' },
   ];
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: '#f8fafc',
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
-      }}
-    >
+    <div className="min-h-screen" style={{ background: '#f4f6fb', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
 
+        .page-bg {
+          background: #f4f6fb;
+          background-image:
+            radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99,102,241,0.06) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 110%, rgba(168,85,247,0.04) 0%, transparent 60%);
+        }
+
+        /* ── Card ── */
         .att-card {
-          transition: transform 0.2s cubic-bezier(.22,.68,0,1.2), box-shadow 0.2s ease, border-color 0.2s ease;
-          background: #ffffff;
+          background: #fff;
+          border-radius: 16px;
+          border: 1px solid #e8ecf4;
+          cursor: pointer;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          transition: transform 0.22s cubic-bezier(.22,.68,0,1.15),
+                      box-shadow 0.22s ease,
+                      border-color 0.22s ease;
         }
         .att-card:hover {
-          transform: translateY(-3px) scale(1.013);
+          transform: translateY(-4px);
+          border-color: transparent;
+          box-shadow: 0 20px 60px rgba(15,23,42,.10), 0 4px 16px rgba(15,23,42,.06);
         }
-        .chevron-slide {
-          transition: transform 0.18s ease, opacity 0.18s ease;
+        .card-arrow {
           opacity: 0;
+          transform: translate(-4px, 4px);
+          transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        .att-card:hover .chevron-slide {
-          transform: translateX(4px);
-          opacity: 1;
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .card-enter {
-          animation: fadeUp 0.4s ease forwards;
-          opacity: 0;
-        }
+        .att-card:hover .card-arrow { opacity: 1; transform: translate(0, 0); }
+
+        /* ── Shimmer skeleton ── */
         @keyframes shimmer {
-          0%   { background-position: -400px 0; }
-          100% { background-position: 400px 0; }
+          0%   { background-position: -600px 0; }
+          100% { background-position:  600px 0; }
         }
         .skel {
-          background: linear-gradient(90deg, #f1f5f9 25%, #e8edf3 50%, #f1f5f9 75%);
-          background-size: 400px 100%;
-          animation: shimmer 1.3s infinite;
+          background: linear-gradient(90deg, #eef0f6 25%, #e4e8f2 50%, #eef0f6 75%);
+          background-size: 600px 100%;
+          animation: shimmer 1.4s infinite;
+          border-radius: 16px;
+          border: 1px solid #e8ecf4;
         }
-        .header-blob {
-          position: absolute;
-          right: -40px;
-          top: -60px;
-          width: 280px;
-          height: 280px;
-          background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
-          pointer-events: none;
+
+        /* ── Staggered card entrance ── */
+        @keyframes cardIn {
+          from { opacity: 0; transform: translateY(18px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0)    scale(1);    }
         }
+        .card-enter { animation: cardIn 0.38s cubic-bezier(.22,.68,0,1.1) forwards; opacity: 0; }
+
+        /* ── Side color bar ── */
+        .subject-bar { width: 4px; border-radius: 0 4px 4px 0; flex-shrink: 0; align-self: stretch; }
+
+        /* ── Ghost cards for empty state ── */
+        .empty-ghost {
+          display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+          opacity: 0.25; margin-bottom: 32px;
+        }
+        .ghost-card { height: 130px; background: #dde2ec; border-radius: 12px; }
+
+        /* ── Stat chip ── */
+        .stat-chip {
+          display: flex; flex-direction: column; align-items: center; gap: 2px;
+          padding: 10px 20px; border-right: 1px solid #e8ecf4;
+        }
+        .stat-chip:last-child { border-right: none; }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main
-            className={`p-6 lg:p-10 transition-all duration-300 ${
-              collapsed ? "ml-20" : "ml-64"
-            }`}
-          >
+      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
 
-        {/* ── Header ── */}
+        {/* ══════════ STICKY HEADER ══════════ */}
         <div
-          className="relative overflow-hidden px-10 py-8 border-b"
-          style={{ background: '#ffffff', borderColor: '#e2e8f0' }}
+          style={{
+            position: 'sticky', top: 0, zIndex: 20,
+            background: 'rgba(244,246,251,0.93)',
+            backdropFilter: 'blur(14px)',
+            borderBottom: '1px solid #e2e8f0',
+          }}
         >
-          <div className="header-blob" />
+          {/* Title row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              {/* Icon badge — matches assignments page gradient icon */}
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 6px 20px rgba(99,102,241,.28)',
+              }}>
+                <ClipboardList style={{ width: 20, height: 20, color: '#fff' }} />
+              </div>
 
-          <div className="flex items-center gap-4 relative z-10">
-            <div
-              className="flex items-center justify-center w-12 h-12 rounded-2xl flex-shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                boxShadow: '0 4px 14px rgba(99,102,241,0.3)',
-              }}
-            >
-              <ClipboardList className="w-5 h-5 text-white" />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h1 style={{ fontSize: 21, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.4px', margin: 0 }}>
+                    Attendance
+                  </h1>
+                  {!loading && (
+                    <span style={{
+                      fontSize: 11, fontFamily: "'DM Mono', monospace", fontWeight: 500,
+                      background: '#1e293b', color: '#fff', padding: '2px 10px', borderRadius: 999,
+                    }}>
+                      {classrooms.length} {classrooms.length === 1 ? 'class' : 'classes'}
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 13, color: '#94a3b8', margin: '3px 0 0' }}>
+                  Select a classroom to view your attendance record
+                </p>
+              </div>
             </div>
 
-            <div>
-              <h1
-                className="text-2xl font-bold tracking-tight"
-                style={{ color: '#0f172a' }}
-              >
-                Attendance
-              </h1>
-              <p className="text-sm mt-0.5" style={{ color: '#94a3b8' }}>
-                Select a classroom to view your attendance record
-              </p>
-            </div>
-
+            {/* Stats strip — mirrors assignments page */}
             {!loading && classrooms.length > 0 && (
-              <div className="ml-auto">
-                <span
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full"
-                  style={{
-                    background: '#ede9fe',
-                    color: '#6d28d9',
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  {classrooms.length} {classrooms.length === 1 ? 'class' : 'classes'}
-                </span>
+              <div style={{
+                display: 'flex', background: '#fff',
+                border: '1px solid #e8ecf4', borderRadius: 12, overflow: 'hidden',
+              }}>
+                {([
+                  { label: 'Enrolled',  value: classrooms.length,                                                    color: '#6366f1' },
+                  { label: 'Active',    value: classrooms.length,                                                    color: '#16a34a' },
+                  { label: 'Subjects',  value: classrooms.length,                                                    color: '#d97706' },
+                ] as const).map(s => (
+                  <div key={s.label} className="stat-chip">
+                    <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }}>
+                      {s.value}
+                    </span>
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                      {s.label}
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
+
+          {/* Thin accent line under title row */}
+          <div style={{ height: 1, background: 'linear-gradient(90deg,#e8ecf4,transparent)', margin: '0 32px' }} />
+          <div style={{ height: 16 }} />
         </div>
 
-        {/* ── Content ── */}
-        <div className="p-10">
+        {/* ══════════ CONTENT ══════════ */}
+        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 140px)' }}>
 
-          {/* Skeletons */}
+          {/* ── Skeletons ── */}
           {loading && (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="skel rounded-2xl h-[148px]"
-                  style={{ border: '1px solid #e2e8f0' }}
-                />
+            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="skel" style={{ height: 190 }} />
               ))}
             </div>
           )}
 
-          {/* Classroom cards */}
+          {/* ── Classroom Cards ── */}
           {!loading && classrooms.length > 0 && (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
               {classrooms.map((classroom, i) => {
-                const accent = accentColors[i % accentColors.length];
-                const isHovered = hoveredId === classroom._id;
+                const color = subjectColors[i % subjectColors.length];
+
                 return (
-                  <div
-                    key={classroom._id}
-                    className="card-enter"
-                    style={{ animationDelay: `${i * 55}ms` }}
-                  >
+                  <div key={classroom._id} className="card-enter" style={{ animationDelay: `${i * 45}ms` }}>
                     <div
-                      className="att-card relative cursor-pointer rounded-2xl overflow-hidden flex flex-col"
-                      style={{
-                        border: isHovered
-                          ? `1px solid ${accent.strip}55`
-                          : '1px solid #e2e8f0',
-                        boxShadow: isHovered
-                          ? `0 16px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05)`
-                          : '0 1px 4px rgba(0,0,0,0.05)',
-                      }}
-                      onClick={() =>
-                        router.push(
-                          `/studentPortal/attendance/showAttendence/${classroom._id}`
-                        )
-                      }
+                      className="att-card"
+                      onClick={() => router.push(`/studentPortal/attendance/showAttendence/${classroom._id}`)}
                       onMouseEnter={() => setHoveredId(classroom._id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
-                      {/* Colored top strip */}
-                      <div
-                        className="h-1 w-full flex-shrink-0"
-                        style={{ background: accent.strip }}
-                      />
+                      {/* Left color bar + content — same layout as assignment cards */}
+                      <div style={{ display: 'flex', flex: 1 }}>
+                        <div className="subject-bar" style={{ background: color.bar }} />
 
-                      <div className="p-5 flex flex-col gap-4">
-                        {/* Icon + chevron */}
-                        <div className="flex items-start justify-between">
-                          <div
-                            className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
-                            style={{ background: accent.iconBg }}
-                          >
-                            <BookOpen
-                              className="w-4 h-4"
-                              style={{ color: accent.iconColor }}
-                            />
+                        <div style={{ flex: 1, padding: '18px 18px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+                          {/* Top row: icon + arrow */}
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                            <div style={{
+                              width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                              background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <BookOpen style={{ width: 16, height: 16, color: color.mid }} />
+                            </div>
+                            <div className="card-arrow">
+                              <ArrowUpRight style={{ width: 16, height: 16, color: '#94a3b8' }} />
+                            </div>
                           </div>
-                          <ChevronRight
-                            className="chevron-slide w-4 h-4 mt-1"
-                            style={{ color: accent.iconColor }}
-                          />
-                        </div>
 
-                        {/* Text */}
-                        <div>
-                          <h3
-                            className="font-semibold text-sm leading-snug mb-1.5"
-                            style={{ color: '#0f172a' }}
-                          >
-                            {classroom.classroom_name}
-                          </h3>
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                              style={{ background: accent.dot }}
-                            />
-                            <p className="text-xs" style={{ color: '#94a3b8' }}>
-                              View attendance record
+                          {/* Classroom name */}
+                          <div>
+                            <h3 style={{ fontSize: 14, fontWeight: 650, color: '#0f172a', lineHeight: 1.35, marginBottom: 5, letterSpacing: '-0.1px' }}>
+                              {classroom.classroom_name}
+                            </h3>
+                            <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.55 }}>
+                              Tap to view your attendance record
                             </p>
                           </div>
+
+                          {/* Divider */}
+                          <div style={{ height: 1, background: '#f1f5f9' }} />
+
+                          {/* Footer */}
+                          <div style={{
+                            marginTop: 'auto',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          }}>
+                            {/* Classroom index badge */}
+                            <span style={{
+                              fontSize: 11, fontFamily: "'DM Mono', monospace", fontWeight: 500,
+                              background: color.light, color: color.mid,
+                              padding: '3px 10px', borderRadius: 999,
+                              border: `1px solid ${color.mid}22`,
+                            }}>
+                              Class {String(i + 1).padStart(2, '0')}
+                            </span>
+
+                            <span style={{ fontSize: 11, color: color.mid, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}>
+                              View record <ArrowUpRight style={{ width: 11, height: 11 }} />
+                            </span>
+                          </div>
                         </div>
+                      </div>
+
+                      {/* Progress strip at bottom — mirrors assignments page */}
+                      <div style={{ height: 3, background: '#f1f5f9', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{
+                          position: 'absolute', inset: 0,
+                          background: color.bar,
+                          opacity: 0.55,
+                          width: `${35 + (i % 4) * 18}%`,
+                        }} />
                       </div>
                     </div>
                   </div>
@@ -261,26 +301,28 @@ export default function StudentAttendancePage() {
             </div>
           )}
 
-          {/* Empty state */}
+          {/* ── Empty state ── */}
           {!loading && classrooms.length === 0 && (
-            <div
-              className="flex flex-col items-center justify-center py-24 rounded-2xl"
-              style={{
-                background: '#ffffff',
-                border: '1.5px dashed #e2e8f0',
-              }}
-            >
-              <div
-                className="flex items-center justify-center w-16 h-16 rounded-2xl mb-5"
-                style={{ background: '#ede9fe' }}
-              >
-                <GraduationCap className="w-7 h-7" style={{ color: '#7c3aed' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px', textAlign: 'center' }}>
+              {/* Ghost grid — same as assignments empty state */}
+              <div className="empty-ghost" style={{ width: 280 }}>
+                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="ghost-card" />)}
               </div>
-              <p className="text-base font-semibold mb-1" style={{ color: '#0f172a' }}>
+
+              <div style={{
+                width: 56, height: 56, borderRadius: 16,
+                background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(99,102,241,.25)',
+              }}>
+                <GraduationCap style={{ width: 24, height: 24, color: '#fff' }} />
+              </div>
+
+              <p style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.2px' }}>
                 No classrooms found
               </p>
-              <p className="text-sm" style={{ color: '#94a3b8' }}>
-                You haven't been enrolled in any classes yet.
+              <p style={{ fontSize: 13, color: '#94a3b8', maxWidth: 280, lineHeight: 1.6 }}>
+                You haven't been enrolled in any classes yet. Check back once your teacher adds you.
               </p>
             </div>
           )}
