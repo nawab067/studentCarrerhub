@@ -16,12 +16,13 @@ export default function EditcoursePageWrapper() {
     const router = useRouter();
     const params = useParams();
     const courseId = params.id as string;
+    const baseUrl = process.env.BASE_URL;
 
 
     async function getcourse(id: string) {
         try {
             setLoading(true);
-            const res = await axios.get(`http://127.0.0.1:8000/teacher/course/${id}`);
+            const res = await axios.get(`${baseUrl}/teacher/course/${id}`);
             setCourse(res.data);
         } catch (error) {
             console.error("Error fetching course:", error);
@@ -36,7 +37,7 @@ export default function EditcoursePageWrapper() {
         try {
             setLoading(true);
             await axios.put(
-                `http://127.0.0.1:8000/teacher/course/${courseId}`,
+                `${baseUrl}/teacher/course/${courseId}`,
                 updatedCourse,
                 { headers: { "Content-Type": "application/json" } }
             );
@@ -52,8 +53,8 @@ export default function EditcoursePageWrapper() {
     async function loadDropdownData() {
         try {
             const [subRes, teachRes] = await Promise.all([
-                axios.get("http://127.0.0.1:8000/teacher/subject/"),
-                axios.get("http://127.0.0.1:8000/teacher"),
+                axios.get(`${baseUrl}/teacher/subject/`),
+                axios.get(`${baseUrl}/teacher`),
             ]);
 
             const fixedSubjects: Subject[] = subRes.data.map((s: any) => ({

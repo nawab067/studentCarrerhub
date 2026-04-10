@@ -48,13 +48,14 @@ export default function SeeAssessment() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsed, setCollapsed] = useState(false);
+  const baseurl = process.env.BASE_URL;
 
   async function fetchAssessmentDetails() {
     try {
       setLoading(true);
 
       const response = await axios.get(
-        `http://127.0.0.1:8000/get_assesments/${AssesmentId}`
+        `${baseurl}/get_assesments/${AssesmentId}`
       );
 
       console.log(response.data.data);

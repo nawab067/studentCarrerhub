@@ -38,6 +38,8 @@ export default function UploadAssessmentPage() {
   const [dragOver, setDragOver]         = useState(false);
   const[loading, setLoading] = useState(true);
 
+  const baseurl = process.env.BASE_URL;
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function UploadAssessmentPage() {
     if (!AssesmentId) return;
     async function getAssessment() {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/student/assesment/${AssesmentId}`);
+        const response = await axios.get(`${baseurl}/student/assesment/${AssesmentId}`);
         setAssesmnet(response.data);
       } catch (error) { console.error('Error fetching assessment', error); }
     }
@@ -61,7 +63,7 @@ export default function UploadAssessmentPage() {
     async function get_uploaded_file() {
       try {
         const response = await axios.get(
-          `http://127.0.0.1:8000/student/submission/${AssesmentId}/${studentId}`
+          `${baseurl}/student/submission/${AssesmentId}/${studentId}`
         );
         if (response.data.submitted) {
           setUploadSuccess(true);
@@ -76,7 +78,7 @@ export default function UploadAssessmentPage() {
     if (!assesmnet) return;
     async function getTeacher() {
       try {
-        const r = await axios.get(`http://127.0.0.1:8000/classes/teacher/user/${assesmnet?.teacherId}`);
+        const r = await axios.get(`${baseurl}/classes/teacher/user/${assesmnet?.teacherId}`);
         setTeacherName(r.data.name);
       } catch (e) { console.error(e); }
     }
@@ -87,7 +89,7 @@ export default function UploadAssessmentPage() {
     if (!assesmnet) return;
     async function getClassroom() {
       try {
-        const r = await axios.get(`http://127.0.0.1:8000/classes/classroom/${assesmnet?.classId}`);
+        const r = await axios.get(`${baseurl}/classes/classroom/${assesmnet?.classId}`);
         setClassroomName(r.data.classroom_name);
       } catch (e) { console.error(e); }
     }
@@ -98,7 +100,7 @@ export default function UploadAssessmentPage() {
     if (!studentId) return;
     async function getStudentName() {
       try {
-        const r = await axios.get(`http://127.0.0.1:8000/classes/student/user/${studentId}`);
+        const r = await axios.get(`${baseurl}/classes/student/user/${studentId}`);
         setStudentName(r.data.name);
       } catch (e) { console.error(e); }
     }
@@ -129,7 +131,7 @@ export default function UploadAssessmentPage() {
   try {
     setLoading(true);
     const response = await axios.get(
-      `http://127.0.0.1:8000/classes/student/user/id/${studentId}`
+      `${baseurl}/classes/student/user/id/${studentId}`
     );
 
     console.log("Student API Response:", response.data); // 👈 debug
@@ -165,7 +167,7 @@ useEffect(() => {
 
   try {
     const response = await axios.post(
-      `http://127.0.0.1:8000/upload-assessment/${AssesmentId}`,
+      `${baseurl}/upload-assessment/${AssesmentId}`,
       formData
     );
     setUploadSuccess(true);

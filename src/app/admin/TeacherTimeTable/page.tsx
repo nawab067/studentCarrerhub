@@ -239,11 +239,12 @@ export default function TeacherTimeTable() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const router = useRouter();
+  const baseUrl = process.env.BASE_URL;
 
   async function fetchTimetable() {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/all_time_slots');
+      const response = await axios.get(`${baseUrl}/all_time_slots`);
       const slots: TeacherTimeTableProps[] = response.data;
 
       const slotsWithNames = await Promise.all(
@@ -251,11 +252,11 @@ export default function TeacherTimeTable() {
           let teacher_name = 'Unknown';
           let classroom_name = 'Unknown';
           try {
-            const res = await axios.get(`http://127.0.0.1:8000/classes/teacher/${slot.teacher_id}`);
+            const res = await axios.get(`${baseUrl}/classes/teacher/${slot.teacher_id}`);
             teacher_name = res.data.name || 'Unknown';
           } catch {}
           try {
-            const res = await axios.get(`http://127.0.0.1:8000/classes/classroom/${slot.classroom_id}`);
+            const res = await axios.get(`${baseUrl}/classes/classroom/${slot.classroom_id}`);
             classroom_name = res.data.classroom_name || 'Unknown';
           } catch {}
           return { ...slot, teacher_name, classroom_name };
@@ -273,7 +274,7 @@ export default function TeacherTimeTable() {
 
   const handleDelete = async (slotId: string) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/delete_time_slot/${slotId}`);
+      await axios.delete(`${baseUrl}/delete_time_slot/${slotId}`);
       setTeacherTimeTable(prev => prev.filter(s => s._id !== slotId));
     } catch {
       alert('Failed to delete slot');

@@ -13,13 +13,14 @@ export default function EditstudentPageWrapper() {
 
   const [loading, setLoading] = useState(false);
   const [studentData, setStudentData] = useState<Student| null>(null);
+  const baseUrl = process.env.BASE_URL;
 
   // Fetch student data on load
   async function getStudent() {
     try {
       setLoading(true);
       const response = await axios.get<Student>(
-        `http://127.0.0.1:8000/student/${params.id}`
+        `${baseUrl}/student/${params.id}`
       );
       setStudentData(response.data);
     } catch (error: any) {
@@ -55,7 +56,7 @@ export default function EditstudentPageWrapper() {
       }
 
       await axios.put(
-        `http://127.0.0.1:8000/student/${params.id}`,
+        `${baseUrl}/student/${params.id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

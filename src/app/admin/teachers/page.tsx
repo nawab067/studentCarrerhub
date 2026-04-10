@@ -21,11 +21,12 @@ export default function TeachersPage() {
     const [teachers, setTeachers] = useState<teacher[]>([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const baseUrl = process.env.BASE_URL;
 
     async function fetch_Teacher() {
         setLoading(true);
         try {
-            const response = await axios.get('http://127.0.0.1:8000/teacher', {
+            const response = await axios.get(`${baseUrl}/teacher`, {
                 headers: { 'Content-Type': 'application/json' }
             });
             setTeachers(response.data);
@@ -41,7 +42,7 @@ export default function TeachersPage() {
 
         try {
             setLoading(true);
-            await axios.delete(`http://127.0.0.1:8000/teacher/${id}`, {
+            await axios.delete(`${baseUrl}/teacher/${id}`, {
                 headers: { 'Content-Type': 'application/json' }
             });
 

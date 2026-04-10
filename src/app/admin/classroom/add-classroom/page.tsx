@@ -11,10 +11,12 @@ export default function ClassroomAddPageContainer() {
   const [teachers, setTeachers] = useState<teacher[]>([]);
   const router = useRouter();
 
+  const baseUrl = process.env.BASE_URL;
+
   useEffect(() => {
     async function fetchTeachers() {
       try {
-        const res = await axios.get("http://127.0.0.1:8000/teacher");
+        const res = await axios.get(`${baseUrl}/teacher`);
         setTeachers(res.data);
       } catch (error) {
         console.error(error);

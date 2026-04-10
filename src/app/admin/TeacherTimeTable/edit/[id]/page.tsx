@@ -26,6 +26,7 @@ export default function TeacherTimeTableEdit() {
   const router = useRouter();
   const params = useParams();
   const slotId = params?.id as string | undefined;
+  const baseUrl = process.env.BASE_URL;
 
   useEffect(() => {
     async function fetchAll() {
@@ -41,12 +42,12 @@ export default function TeacherTimeTableEdit() {
   }, [slotId]);
 
   async function fetchTeachers() {
-    const res = await axios.get("http://127.0.0.1:8000/teacher");
+    const res = await axios.get(`${baseUrl}/teacher`);
     setTeachers(res.data.map((t: any) => ({ id: String(t.id ?? t._id), name: t.name })));
   }
 
   async function fetchClassrooms() {
-    const res = await axios.get("http://127.0.0.1:8000/classrooms");
+    const res = await axios.get(`${baseUrl}/classrooms`);
     setClassrooms(
       (res.data?.data ?? []).map((c: any) => ({
         id: String(c._id),
@@ -59,7 +60,7 @@ export default function TeacherTimeTableEdit() {
   setLoading(true);
 
   const res = await axios.get(
-    `http://127.0.0.1:8000/time_table/${id}`
+    `${baseUrl}/time_table/${id}`
   );
 
   const slot = res.data;
@@ -84,7 +85,7 @@ export default function TeacherTimeTableEdit() {
 
   async function updateSlot(data: SlotData) {
     setLoading(true);
-    await axios.put(`http://127.0.0.1:8000/update_time_slot/${slotId}`, data);
+    await axios.put(`${baseUrl}/update_time_slot/${slotId}`, data);
     router.push("/admin/TeacherTimeTable");
   
   }

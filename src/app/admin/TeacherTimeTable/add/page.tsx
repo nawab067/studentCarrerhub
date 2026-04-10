@@ -20,10 +20,11 @@ export default function TeacherTimeTableAdd() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const router = useRouter();
+  const baseUrl = process.env.BASE_URL;
 
   async function fetchTeachers() {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/teacher");
+      const res = await axios.get(`${baseUrl}/teacher`);
       setTeachers(
         res.data.map((t: any) => ({
           id: t.id ?? t._id ?? t.teacher_id,
@@ -37,7 +38,7 @@ export default function TeacherTimeTableAdd() {
 
   async function fetchClassrooms() {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/classrooms");
+      const res = await axios.get(`${baseUrl}/classrooms`);
       const classroomArray = res.data?.data ?? [];
       setClassrooms(
         classroomArray.map((c: any) => ({
@@ -53,7 +54,7 @@ export default function TeacherTimeTableAdd() {
   async function addSlot(newSlot: SlotData) {
     try {
       setLoading(true);
-      await axios.post("http://127.0.0.1:8000/add_time_slot", newSlot);
+      await axios.post(`${baseUrl}/add_time_slot`, newSlot);
       alert("Time slot added successfully");
       router.push("/admin/TeacherTimeTable");
     } catch (error) {

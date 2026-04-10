@@ -90,6 +90,7 @@ export default function AttendanceSheetPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const baseurl = process.env.BASE_URL;
   useEffect(() => {
     if (!classroomId) return;
 
@@ -98,7 +99,7 @@ export default function AttendanceSheetPage() {
         setLoading(true);
 
         const res = await axios.get<Classroom>(
-          `http://127.0.0.1:8000/classroom/${classroomId}`
+          `${baseurl}/classroom/${classroomId}`
         );
 
         setClassroom(res.data);
@@ -146,7 +147,7 @@ export default function AttendanceSheetPage() {
       };
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/mark_attendance",
+        `${baseurl}/mark_attendance`,
         payload
       );
 

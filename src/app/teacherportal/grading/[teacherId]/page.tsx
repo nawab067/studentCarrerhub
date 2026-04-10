@@ -32,6 +32,7 @@ export default function TeacherClassesPage() {
   const [assessment, setAssessment] = useState<Assessment[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
+  const baseurl= process.env.BASE_URL;
 
   // ✅ 1️⃣ READ teacherId from localStorage
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function TeacherClassesPage() {
         console.log(teacherId);
 
         const response = await axios.get(
-          `http://127.0.0.1:8000/classes/assigned/${teacherId}`
+          `${baseurl}/classes/assigned/${teacherId}`
         );
 
         console.log("FULL API RESPONSE:", response.data);

@@ -65,6 +65,7 @@ export default function TeacherPortalSidebar({
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [teacherName, setTeacherName] = useState("");
+  const baseurl = process.env.BASE_URL;
 
   useEffect(() => {
     const id = localStorage.getItem("teacherId");
@@ -133,7 +134,7 @@ const handleseeprofile = () => {
   async function get_name_of_teacher_Buy_userId(){
     try {
       setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8000/classes/teacher/user/${teacherId}`);
+      const response = await axios.get(`${baseurl}/classes/teacher/user/${teacherId}`);
       console.log(response.data);
       setTeacherName(response.data.name);
 
@@ -152,7 +153,7 @@ const handleseeprofile = () => {
   async function get_email_of_teacher_Buy_userId(){
     try {
       setLoading(true);
-      const response=  await axios.get(`http://127.0.0.1:8000/classes/teacher/email/${teacherId}`);
+      const response=  await axios.get(`${baseurl}/classes/teacher/email/${teacherId}`);
       console.log(response.data);
       setEmail(response.data.email);
     } catch (error) {

@@ -22,6 +22,8 @@ export default function TeacherDashboardPage() {
   const [totalAssessments, setTotalAssessments] = useState<number>(0);
    const [collapsed, setCollapsed] = useState(false);
 
+   const baseurl = process.env.BASE_URL
+
   const totalStudents = Array.from(
     new Set(assignedClasses.flatMap((cls) => cls.students))
   ).length;
@@ -51,7 +53,7 @@ export default function TeacherDashboardPage() {
         console.log(teacherId);
 
         const response = await axios.get(
-          `http://127.0.0.1:8000/classes/assigned/${teacherId}`
+          `${baseurl}/classes/assigned/${teacherId}`
         );
 
         console.log("FULL API RESPONSE:", response.data);
@@ -72,7 +74,7 @@ export default function TeacherDashboardPage() {
   const fetchAssessments = async (teacherId: string) => {
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/all_assesments/${teacherId}`
+        `${baseurl}/all_assesments/${teacherId}`
       );
 
       const assessments = res.data.data || [];

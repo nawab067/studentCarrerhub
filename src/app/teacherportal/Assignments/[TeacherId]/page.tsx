@@ -71,6 +71,7 @@ export default function TeacherClassesPage() {
 
   const [activeClassId, setActiveClassId] = useState<string | null>(null)
   const [activeClassName, setActiveClassName] = useState('')
+  const baseUrl = process.env.BASE_URL
 
   useEffect(() => {
     const id = localStorage.getItem('teacherId')
@@ -88,7 +89,7 @@ export default function TeacherClassesPage() {
       try {
         setLoading(true)
         const res = await axios.get(
-          `http://127.0.0.1:8000/classes/assigned/${teacherId}`
+          `${baseUrl}/classes/assigned/${teacherId}`
         )
         setAssignedClasses(res.data?.data || [])
       } catch {
@@ -104,7 +105,7 @@ export default function TeacherClassesPage() {
   const fetchAssessments = async (classId: string) => {
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/get_assesments/${classId}`
+      `${baseUrl}/get_assesments/${classId}`
       )
       setAssessments(res.data?.data || [])
     } catch {
@@ -128,7 +129,7 @@ export default function TeacherClassesPage() {
   const handleDeleteAssessment = async (assessmentId: string) => {
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/delete_assesment/${assessmentId}`
+        `${baseUrl}/delete_assesment/${assessmentId}`
       )
       setAssessments((prev) =>
         prev.filter((a) => a._id !== assessmentId)

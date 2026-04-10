@@ -12,16 +12,18 @@ export interface subject {
     subjectId: string;
 }
 
+
 export default function AddsubjectPageWrapper() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const baseUrl = process.env.BASE_URL;
 
     async function addsubject(subject: subject) {
     try {
         setLoading(true);
 
         const response = await axios.post(
-            "http://127.0.0.1:8000/teacher/subject/",
+            `${baseUrl}/teacher/subject/`,
             {
                 subject_name: subject.subject_name,
                 description: subject.description,

@@ -27,6 +27,9 @@ export function ChangePasswordDialog({
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const baseUrl = process.env.BASE_URL;
+
+  // ✅ AUTO-FILL EMAIL FROM LOCAL STORAGE
 
 
   useEffect(() => {
@@ -43,7 +46,7 @@ export function ChangePasswordDialog({
   try {
     setLoading(true);
 
-    await axios.put("http://127.0.0.1:8000/teacher/password/change", {
+    await axios.put(`${baseUrl}/teacher/password/change`, {
       email: email,
       new_password: newPassword,
     });

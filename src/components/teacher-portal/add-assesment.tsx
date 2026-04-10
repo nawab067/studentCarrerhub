@@ -57,6 +57,7 @@ export default function StudentDialog({
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const baseurl = process.env.BASE_URL;
 
   useEffect(() => {
     setAssessmentData((prev) => ({
@@ -86,7 +87,7 @@ export default function StudentDialog({
       setError(null)
 
       await axios.post(
-        'http://127.0.0.1:8000/create_assesment',
+        `${baseurl}/create_assesment`,
         assessmentData
       )
 

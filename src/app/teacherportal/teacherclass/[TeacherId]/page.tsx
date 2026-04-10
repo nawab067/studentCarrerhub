@@ -28,6 +28,7 @@ export default function TeacherClassesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const baseUrl = process.env.BASE_URL;
 
   // ✅ 1️⃣ READ teacherId from localStorage
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function TeacherClassesPage() {
         console.log(teacherId);
 
         const response = await axios.get(
-          `http://127.0.0.1:8000/classes/assigned/${teacherId}`
+          `${baseUrl}/classes/assigned/${teacherId}`
         );
 
         console.log("FULL API RESPONSE:", response.data);

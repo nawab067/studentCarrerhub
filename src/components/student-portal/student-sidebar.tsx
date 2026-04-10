@@ -52,6 +52,7 @@ export default function StudentPortalSidebar({
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [studentName, setStudentName] = useState<string>("");
+  const baseurl = process.env.BASE_URL;
 
   useEffect(() => {
   setStudentId(localStorage.getItem("studentId"));
@@ -79,7 +80,7 @@ export default function StudentPortalSidebar({
   try {
     setLoading(true);
     const response = await axios.get(
-      `http://127.0.0.1:8000/classes/student/user/${studentId}`
+      `${baseurl}/classes/student/user/${studentId}`
     );
 
     setStudentName(response.data.name);
@@ -97,7 +98,7 @@ async function get_Student_email_Byuserid() {
   if (!studentId) return;
   try {
     setLoading(true);
-    const response = await axios.get(`http://127.0.0.1:8000/classes/student/email/${studentId}`);
+    const response = await axios.get(`${baseurl}/classes/student/email/${studentId}`);
     setUserEmail(response.data.email);
   } catch (error) {
     console.error("Error fetching student email:", error);

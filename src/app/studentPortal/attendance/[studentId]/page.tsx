@@ -25,6 +25,8 @@ export default function StudentAttendancePage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
+  const baseurl = process.env.BASE_URL;
+
   const router = useRouter();
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function StudentAttendancePage() {
 
   const fetchClassrooms = async (id: string) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/classes/student/${id}`);
+      const res = await axios.get(`${baseurl}/classes/student/${id}`);
       setClassrooms(res.data);
     } catch (err) {
       console.error('Error fetching classrooms:', err);

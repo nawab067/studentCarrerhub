@@ -23,6 +23,7 @@ export default function TeacherProfilePage() {
   const [loading, setLoading] = useState(true);
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const baseUrl = process.env.BASE_URL;
 
  useEffect(() => {
   const id = localStorage.getItem("teacherId");
@@ -35,7 +36,7 @@ useEffect(() => {
   const fetchTeacher = async () => {
     try {
       const response = await axios.get(
-        `http://127.0.0.1:8000/teacher/user/${teacherId}`
+        `${baseUrl}/teacher/user/${teacherId}`
       );
       setTeacher(response.data);
     } catch (error) {

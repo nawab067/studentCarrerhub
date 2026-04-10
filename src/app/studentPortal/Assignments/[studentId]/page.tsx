@@ -33,6 +33,8 @@ export default function StudentAssignmentsPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
 
+  const baseUrl = process.env.BASE_URL;
+
   useEffect(() => {
     const id = localStorage.getItem('studentId');
     if (!id) { router.replace('/login'); return; }
@@ -43,7 +45,7 @@ export default function StudentAssignmentsPage() {
   async function getAssesmnet() {
     try {
       setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8000/student/assesments/${studentId}`);
+      const response = await axios.get(`${baseUrl}/student/assesments/${studentId}`);
       setAssessments(response.data);
     } catch (error) {
       console.error('Error fetching assessments:', error);
@@ -56,14 +58,14 @@ export default function StudentAssignmentsPage() {
 
   async function classroomName(classId: string) {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/classes/classroom/${classId}`);
+      const res = await axios.get(`${baseUrl}/classes/classroom/${classId}`);
       return res.data;
     } catch { console.error('Error fetching classroom'); }
   }
 
   async function getTeacherName(teacherId: string) {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/classes/teacher/user/${teacherId}`);
+      const res = await axios.get(`${baseUrl}/classes/teacher/user/${teacherId}`);
       return res.data;
     } catch { console.error('Error fetching teacher'); }
   }

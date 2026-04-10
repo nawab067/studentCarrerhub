@@ -20,11 +20,12 @@ export default function SubjectsPage() {
     const [subject, setsubject] = useState<subject[]>([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const baseUrl = process.env.BASE_URL;
 
     async function fetch_Teacher() {
         setLoading(true);
         try {
-            const response = await axios.get('http://127.0.0.1:8000/teacher/subject/', {
+            const response = await axios.get(`${baseUrl}/teacher/subject/`, {
                 headers: { 'Content-Type': 'application/json' }
             });
             setsubject(response.data);
@@ -39,7 +40,7 @@ export default function SubjectsPage() {
         if (!confirm("Are you sure you want to delete this subject?")) return;
         try {
             setLoading(true);
-            await axios.delete(`http://127.0.0.1:8000/teacher/subject/${id}`, {
+            await axios.delete(`${baseUrl}/teacher/subject/${id}`, {
                 headers: { 'Content-Type': 'application/json' }
             });
             fetch_Teacher();

@@ -34,10 +34,12 @@ export default function AddcoursePageWrapper() {
 
   const router = useRouter();
 
+  const baseUrl = process.env.BASE_URL;
+
   useEffect(() => {
     async function fetchSubjects() {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/teacher/subject/");
+        const response = await axios.get(`${baseUrl}/teacher/subject/`);
         // Ensure it's an array
         setSubjects(Array.isArray(response.data) ? response.data : []);   
       } catch (error) {
@@ -47,7 +49,7 @@ export default function AddcoursePageWrapper() {
 
     async function fetchTeachers() {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/teacher"); 
+        const response = await axios.get(`${baseUrl}/teacher`); 
         setTeachers(Array.isArray(response.data) ? response.data : []);     
       } catch (error) {
         console.error("Error fetching teachers:", error);
@@ -66,7 +68,7 @@ export default function AddcoursePageWrapper() {
     }) {
       try {
         setLoading(true);
-        await axios.post("http://127.0.0.1:8000/teacher/course/", courseData);
+        await axios.post(`${baseUrl}/teacher/course/`, courseData);
         alert("Course added successfully!");
         router.push("/admin/courses");
       } catch (error: any) {

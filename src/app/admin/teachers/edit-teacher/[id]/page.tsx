@@ -14,11 +14,13 @@ export default function EditTeacherPage() {
   const params = useParams();
   const id = params?.id as string; 
 
+  const baseUrl = process.env.BASE_URL;
+
 
   async function getTeacher() {
     try {
       setLoading(true);
-      const response = await axios.get<Teacher>(`http://127.0.0.1:8000/teacher/${id}`, {
+      const response = await axios.get<Teacher>(`${baseUrl}/teacher/${id}`, {
         headers: { "Content-Type": "application/json" },
       });
       setTeacher(response.data);
@@ -38,7 +40,7 @@ export default function EditTeacherPage() {
   async function handleUpdate(updatedTeacher: Teacher) {
     try {
       setUpdating(true);
-      await axios.put(`http://127.0.0.1:8000/teacher/${id}`, updatedTeacher, {
+      await axios.put(`${baseUrl}/teacher/${id}`, updatedTeacher, {
         headers: { "Content-Type": "application/json" },
       });
       router.push("/admin/teachers"); 

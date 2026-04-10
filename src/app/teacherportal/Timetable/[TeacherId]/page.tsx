@@ -69,12 +69,13 @@ function StatChip({ icon, label, value, accent }: {
     </div>
   );
 }
+const baseurl = process.env.BASE_URL;
 
 function ClassroomName({ id }: { id: string }) {
   const [name, setName] = useState<string>("…");
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/classes/classroom/${id}`)
+      .get(`${baseurl}/classes/classroom/${id}`)
       .then((r) => setName(r.data.classroom_name ?? "Unknown"))
       .catch(() => setName("Unknown"));
   }, [id]);
@@ -177,6 +178,8 @@ export default function TimetablePage() {
   const [sheetOpen, setSheetOpen]       = useState(false);
   const [collapsed, setCollapsed]       = useState(false);  
 
+  const baseurl = process.env.BASE_URL;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const id = localStorage.getItem("teacherId");
@@ -188,7 +191,7 @@ export default function TimetablePage() {
     if (!teacherId) return;
     setLoading(true);
     axios
-      .get<SlotData[]>(`http://127.0.0.1:8000/teacher_time_table/${teacherId}`)
+      .get<SlotData[]>(`${baseurl}/teacher_time_table/${teacherId}`)
       .then((r) => setTimeslots(r.data))
       .catch(() => setError("Error fetching the timetable"))
       .finally(() => setLoading(false));

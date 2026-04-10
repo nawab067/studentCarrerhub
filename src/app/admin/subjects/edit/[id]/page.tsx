@@ -10,11 +10,12 @@ export default function EditSubjectPage() {
     const [subjectData, setSubjectData] = useState<subject | null>(null); // avoid name conflict
     const router = useRouter();
     const { id } = useParams();
+    const baseUrl = process.env.BASE_URL;
 
     async function getSubject() {
         try {
             setLoading(true);
-            const response = await axios.get<subject>(`http://127.0.0.1:8000/teacher/subject/${id}`, {
+            const response = await axios.get<subject>(`${baseUrl}/teacher/subject/${id}`, {
                 headers: { "Content-Type": "application/json" },
             });
             setSubjectData(response.data);
@@ -33,7 +34,7 @@ export default function EditSubjectPage() {
     async function handleUpdate(updatedSubject: subject) {
         try {
             setLoading(true);
-            await axios.put(`http://127.0.0.1:8000/teacher/subject/${id}`, updatedSubject, {
+            await axios.put(`${baseUrl}/teacher/subject/${id}`, updatedSubject, {
                 headers: { "Content-Type": "application/json" },
             });
             router.push("/admin/subjects");

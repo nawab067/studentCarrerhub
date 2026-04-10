@@ -11,12 +11,14 @@ export default function LoginPage() {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const router = useRouter();
 
+  const baseUrl = process.env.BASE_URL;
+
   async function handleLogin() {
     try {
       setLoading(true);
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/login",
+        `${baseUrl}/login`,
         {
           email: users.email,
           password: users.password,

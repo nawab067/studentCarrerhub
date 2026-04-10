@@ -20,6 +20,8 @@ export default function StudentGradesPage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const router = useRouter();
 
+  const baseUrl = process.env.BASE_URL;
+
   useEffect(() => {
     const studentId = localStorage.getItem('studentId');
     if (!studentId) { router.replace('/login'); return; }
@@ -28,7 +30,7 @@ export default function StudentGradesPage() {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/classes/student/${id}`);
+      const res = await axios.get(`${baseUrl}/classes/student/${id}`);
       setClasses(res.data);
     } catch (err) {
       console.error(err);

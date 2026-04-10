@@ -14,10 +14,12 @@ export default function ClassroomEditPageWrapper() {
   const [classroomData, setClassroomData] = useState<classroom | null>(null);
   const [teachers, setTeachers] = useState<teacher[]>([]);
 
+  const baseUrl = process.env.BASE_URL;
+
   // Fetch teacher list
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get<teacher[]>("http://127.0.0.1:8000/teacher");
+      const res = await axios.get<teacher[]>(`${baseUrl}/teacher`);
       setTeachers(res.data);
     } catch (err) {
       console.error("Error fetching teachers:", err);
@@ -28,7 +30,7 @@ export default function ClassroomEditPageWrapper() {
   const getClassroom = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<classroom>(`http://127.0.0.1:8000/classroom/${id}`);
+      const response = await axios.get<classroom>(`${baseUrl}/classroom/${id}`);
       setClassroomData(response.data);
     } catch (error) {
       console.error("Error fetching classroom:", error);
@@ -65,7 +67,7 @@ export default function ClassroomEditPageWrapper() {
     };
 
     console.log("Payload sent to backend:", payload);
-    await axios.put(`http://127.0.0.1:8000/classroom/${id}`, payload, {
+    await axios.put(`${baseUrl}/classroom/${id}`, payload, {
       headers: { "Content-Type": "application/json" },
     });
 

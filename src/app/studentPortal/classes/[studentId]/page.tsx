@@ -58,6 +58,7 @@ export default function StudentClassesPage() {
   const [timeTableSlots, setTimeTableSlots] = useState<TimeTableSlot[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [activeDay, setActiveDay] = useState<string | null>(null);
+  const baseurl= process.env.BASE_URL
 
   /* ---------- Auth ---------- */
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function StudentClassesPage() {
     const fetchTimetable = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://127.0.0.1:8000/classes/timetable/${studentId}`);
+        const response = await axios.get(`${baseurl}/classes/timetable/${studentId}`);
         const slots = response.data;
 
         const updatedSlots = await Promise.all(
@@ -80,11 +81,11 @@ export default function StudentClassesPage() {
             let teacherName = 'Unknown';
             let classroomName = 'Unknown';
             try {
-              const t = await axios.get(`http://127.0.0.1:8000/classes/teacher/${slot.teacher_id}`);
+              const t = await axios.get(`${baseurl}/classes/teacher/${slot.teacher_id}`);
               teacherName = t.data.name;
             } catch {}
             try {
-              const c = await axios.get(`http://127.0.0.1:8000/classes/classroom/${slot.classroom_id}`);
+              const c = await axios.get(`${baseurl}/classes/classroom/${slot.classroom_id}`);
               classroomName = c.data.classroom_name;
             } catch {}
             return {

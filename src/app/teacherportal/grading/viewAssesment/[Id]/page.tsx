@@ -56,6 +56,7 @@ export default function ViewAssessment() {
 
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
+  const baseurl = process.env.BASE_URL;
 
   /* ───────────────────────────── */
   /* Auth */
@@ -83,9 +84,9 @@ export default function ViewAssessment() {
       setLoading(true);
 
       const [studentsRes, submissionsRes, gradesRes] = await Promise.all([
-        axios.get(`http://127.0.0.1:8000/grading/${Id}`),
-        axios.get(`http://127.0.0.1:8000/teacher/submission/${Id}/${teacherId}`),
-        axios.get(`http://127.0.0.1:8000/teacher/grading/${Id}`),
+        axios.get(`${baseurl}/grading/${Id}`),
+        axios.get(`${baseurl}/teacher/submission/${Id}/${teacherId}`),
+        axios.get(`${baseurl}/teacher/grading/${Id}`),
       ]);
 
       /* All students */
@@ -123,7 +124,7 @@ export default function ViewAssessment() {
         if (!studentNames[studentId]) {
           try {
             const res = await axios.get(
-              `http://127.0.0.1:8000/classes/student/id/${studentId}`
+              `${baseurl}/classes/student/id/${studentId}`
             );
             newNames[studentId] = res.data.name;
           } catch {
@@ -165,7 +166,7 @@ export default function ViewAssessment() {
         marks: Number(marks[id] || 0),
       }));
 
-      await axios.post(`http://127.0.0.1:8000/teacher/grading/${Id}`, {
+      await axios.post(`${baseurl}/teacher/grading/${Id}`, {
         assesmentId: Id,
         teacherId,
         weightage: Number(weightage),

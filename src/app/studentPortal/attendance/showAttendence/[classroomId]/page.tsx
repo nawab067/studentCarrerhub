@@ -26,6 +26,7 @@ export default function StudentAttendanceDetailsPage() {
   const [attendanceData, setAttendanceData] = useState<StudentAttendance[]>([]);
   const [loading, setLoading] = useState(true);
    const [collapsed, setCollapsed] = useState(false);
+   const baseurl = process.env.BASE_URL;
 
   useEffect(() => {
     const id = localStorage.getItem('studentId');
@@ -41,7 +42,7 @@ export default function StudentAttendanceDetailsPage() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://127.0.0.1:8000/student-attendance/${userId}/${classroomId}`
+        `${baseurl}/student-attendance/${userId}/${classroomId}`
       );
       setAttendanceData(response.data);
     } catch (error) {

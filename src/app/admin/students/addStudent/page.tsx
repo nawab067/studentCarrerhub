@@ -21,6 +21,7 @@ export interface Student {
 export default function AddStudentPageWrapper() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const baseUrl = process.env.BASE_URL;
 
   const addStudent = async (student: Student) => {
     try {
@@ -41,7 +42,7 @@ export default function AddStudentPageWrapper() {
       }
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/student_Added",
+        `${baseUrl}/student_Added`,
         formData
       );
 

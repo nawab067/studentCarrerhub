@@ -48,6 +48,8 @@ export default function ClassroomPage() {
   const [openClassroomId, setOpenClassroomId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const baseUrl = process.env.BASE_URL;
+
   /* =======================
      FETCH CLASSROOMS + TEACHERS
   ======================= */
@@ -56,7 +58,7 @@ export default function ClassroomPage() {
     setLoading(true);
     try {
       // 1️⃣ Get raw classrooms
-      const res = await axios.get("http://127.0.0.1:8000/classrooms");
+      const res = await axios.get(`${baseUrl}/classrooms`);
       const rawClassrooms: Classroom[] = Array.isArray(res.data?.data)
         ? res.data.data
         : [];
@@ -70,7 +72,7 @@ export default function ClassroomPage() {
 
           try {
             const detailRes = await axios.get(
-              `http://127.0.0.1:8000/classroom/${cls._id}`
+              `${baseUrl}/classroom/${cls._id}`
             );
 
             return {
@@ -104,7 +106,7 @@ export default function ClassroomPage() {
     if (!confirm("Are you sure you want to delete this classroom?")) return;
 
     try {
-      await axios.delete(`http://127.0.0.1:8000/classroom/${id}`);
+      await axios.delete(`${baseUrl}/classroom/${id}`);
       setClassrooms((prev) => prev.filter((c) => c._id !== id));
     } catch (error) {
       console.error("Delete error:", error);

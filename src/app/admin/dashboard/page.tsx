@@ -12,12 +12,14 @@ export default function DashboardPage() {
   const [totalCourses, setTotalCourses] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const baseUrl = process.env.BASE_URL;
+
   async function fetchStats() {
     try {
       const [teachersRes, studentsRes, coursesRes] = await Promise.all([
-        axios.get('http://127.0.0.1:8000/teacher'),
-        axios.get('http://127.0.0.1:8000/Student'),
-        axios.get('http://127.0.0.1:8000/teacher/course/')
+        axios.get(`${baseUrl}/teacher`),
+        axios.get(`${baseUrl}/Student`),
+        axios.get(`${baseUrl}/teacher/course/`),
       ]);
 
       setTotalTeachers(teachersRes.data.length);

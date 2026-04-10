@@ -14,11 +14,12 @@ export default function CoursesPage() {
     const [courses, setCourses] = useState<GetCourse[]>([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const baseUrl = process.env.BASE_URL;
 
     async function fetch_Courses() {
         setLoading(true);
         try {
-            const response = await axios.get('http://127.0.0.1:8000/teacher/course/', {
+            const response = await axios.get(`${baseUrl}/teacher/course/`, {
                 headers: { 'Content-Type': 'application/json' }
             });
 
@@ -36,7 +37,7 @@ export default function CoursesPage() {
         if (!confirm("Are you sure you want to delete this course?")) return;
         try {
             setLoading(true);
-            await axios.delete(`http://127.0.0.1:8000/teacher/course/${id}`, {
+            await axios.delete(`${baseUrl}/teacher/course/${id}`, {
                 headers: { 'Content-Type': 'application/json' }
             });
             fetch_Courses();

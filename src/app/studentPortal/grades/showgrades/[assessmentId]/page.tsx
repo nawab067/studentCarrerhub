@@ -36,6 +36,7 @@ export default function StudentGradesDetailPage() {
   const [open, setOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const baseurl= process.env.BASE_URL
 
   useEffect(() => {
     const storedId = localStorage.getItem("studentId");
@@ -46,7 +47,7 @@ export default function StudentGradesDetailPage() {
   async function getStudentAssessments() {
     try {
       setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8000/get_assesments/${assessmentIdParam}`);
+      const response = await axios.get(`${baseurl}/get_assesments/${assessmentIdParam}`);
       setAssessments(response.data.data);
     } catch (error) {
       console.error("Error fetching assessments:", error);
@@ -64,7 +65,7 @@ export default function StudentGradesDetailPage() {
     try {
       setOpen(true);
       setDetailLoading(true);
-      const res = await axios.get(`http://127.0.0.1:8000/student/grades/${assessmentId}/${studentId}`);
+      const res = await axios.get(`${baseurl}/student/grades/${assessmentId}/${studentId}`);
       const studentData = res.data.students?.find((s: any) => s.student_id === studentId);
       setSelectedAssessment({
         name: "Assessment",
