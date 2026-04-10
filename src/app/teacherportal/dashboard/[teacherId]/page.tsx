@@ -22,7 +22,7 @@ export default function TeacherDashboardPage() {
   const [totalAssessments, setTotalAssessments] = useState<number>(0);
    const [collapsed, setCollapsed] = useState(false);
 
-   const baseurl = process.env.BASE_URL
+   const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const totalStudents = Array.from(
     new Set(assignedClasses.flatMap((cls) => cls.students))

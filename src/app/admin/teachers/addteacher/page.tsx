@@ -19,7 +19,7 @@ export interface Teacher {
 export default function AddTeacher() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   async function addTeacher(teacher: Teacher) {
     try {

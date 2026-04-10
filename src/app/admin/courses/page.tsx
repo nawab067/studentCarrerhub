@@ -14,7 +14,7 @@ export default function CoursesPage() {
     const [courses, setCourses] = useState<GetCourse[]>([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const baseUrl = process.env.BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     async function fetch_Courses() {
         setLoading(true);

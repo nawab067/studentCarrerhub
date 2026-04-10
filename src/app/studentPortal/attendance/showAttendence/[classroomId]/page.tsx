@@ -26,7 +26,7 @@ export default function StudentAttendanceDetailsPage() {
   const [attendanceData, setAttendanceData] = useState<StudentAttendance[]>([]);
   const [loading, setLoading] = useState(true);
    const [collapsed, setCollapsed] = useState(false);
-   const baseurl = process.env.BASE_URL;
+   const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const id = localStorage.getItem('studentId');

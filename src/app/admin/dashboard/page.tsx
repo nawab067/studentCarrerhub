@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const [totalCourses, setTotalCourses] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   async function fetchStats() {
     try {

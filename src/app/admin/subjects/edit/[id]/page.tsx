@@ -10,7 +10,7 @@ export default function EditSubjectPage() {
     const [subjectData, setSubjectData] = useState<subject | null>(null); // avoid name conflict
     const router = useRouter();
     const { id } = useParams();
-    const baseUrl = process.env.BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     async function getSubject() {
         try {

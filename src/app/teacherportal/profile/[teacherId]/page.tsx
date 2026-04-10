@@ -23,7 +23,7 @@ export default function TeacherProfilePage() {
   const [loading, setLoading] = useState(true);
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
  useEffect(() => {
   const id = localStorage.getItem("teacherId");

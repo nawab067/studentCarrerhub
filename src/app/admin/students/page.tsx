@@ -26,7 +26,7 @@ export default function StudentPage() {
     const [students, setStudents] = useState<student[]>([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const baseUrl = process.env.BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     async function fetch_Teacher() {
         setLoading(true);

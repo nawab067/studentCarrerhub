@@ -27,7 +27,7 @@ export function ChangePasswordDialog({
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   // ✅ AUTO-FILL EMAIL FROM LOCAL STORAGE
   useEffect(() => {

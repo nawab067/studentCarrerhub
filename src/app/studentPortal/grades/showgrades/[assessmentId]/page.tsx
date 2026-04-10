@@ -36,7 +36,7 @@ export default function StudentGradesDetailPage() {
   const [open, setOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const baseurl= process.env.BASE_URL
+  const baseurl= process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const storedId = localStorage.getItem("studentId");

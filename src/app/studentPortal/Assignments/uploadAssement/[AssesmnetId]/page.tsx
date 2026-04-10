@@ -38,7 +38,7 @@ export default function UploadAssessmentPage() {
   const [dragOver, setDragOver]         = useState(false);
   const[loading, setLoading] = useState(true);
 
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 

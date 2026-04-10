@@ -65,7 +65,7 @@ export default function TeacherPortalSidebar({
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [teacherName, setTeacherName] = useState("");
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const id = localStorage.getItem("teacherId");

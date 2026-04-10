@@ -36,7 +36,7 @@ export default function StudentDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [time, setTime] = useState(new Date());
-  const baseurl = process.env.BASE_URL
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const id = localStorage.getItem('studentId');

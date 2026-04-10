@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const router = useRouter();
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   async function handleLogin() {
     console.log("Base URL:", baseUrl);

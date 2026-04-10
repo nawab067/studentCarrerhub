@@ -57,7 +57,7 @@ export default function StudentDialog({
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     setAssessmentData((prev) => ({

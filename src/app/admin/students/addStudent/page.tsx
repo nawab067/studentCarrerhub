@@ -21,7 +21,7 @@ export interface Student {
 export default function AddStudentPageWrapper() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const addStudent = async (student: Student) => {
     try {

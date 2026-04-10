@@ -48,7 +48,7 @@ export default function SeeAssessment() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsed, setCollapsed] = useState(false);
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   async function fetchAssessmentDetails() {
     try {

@@ -90,7 +90,7 @@ export default function AttendanceSheetPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
   useEffect(() => {
     if (!classroomId) return;
 

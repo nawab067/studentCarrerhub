@@ -25,7 +25,7 @@ export default function StudentAttendancePage() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const router = useRouter();
 

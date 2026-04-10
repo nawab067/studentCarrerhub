@@ -34,7 +34,7 @@ export default function AddcoursePageWrapper() {
 
   const router = useRouter();
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     async function fetchSubjects() {

@@ -32,7 +32,7 @@ export default function TeacherClassesPage() {
   const [assessment, setAssessment] = useState<Assessment[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
-  const baseurl= process.env.BASE_URL;
+  const baseurl= process.env.NEXT_PUBLIC_BASE_URL;
 
   // ✅ 1️⃣ READ teacherId from localStorage
   useEffect(() => {

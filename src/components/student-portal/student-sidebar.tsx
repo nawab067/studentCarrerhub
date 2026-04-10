@@ -52,7 +52,7 @@ export default function StudentPortalSidebar({
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [studentName, setStudentName] = useState<string>("");
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
   setStudentId(localStorage.getItem("studentId"));

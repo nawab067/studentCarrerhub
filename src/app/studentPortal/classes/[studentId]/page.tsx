@@ -58,7 +58,7 @@ export default function StudentClassesPage() {
   const [timeTableSlots, setTimeTableSlots] = useState<TimeTableSlot[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [activeDay, setActiveDay] = useState<string | null>(null);
-  const baseurl= process.env.BASE_URL
+  const baseurl= process.env.NEXT_PUBLIC_BASE_URL;
 
   /* ---------- Auth ---------- */
   useEffect(() => {

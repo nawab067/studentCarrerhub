@@ -24,7 +24,7 @@ export default function TeacherClassesPage() {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   // ✅ 1️⃣ READ teacherId from localStorage
   useEffect(() => {

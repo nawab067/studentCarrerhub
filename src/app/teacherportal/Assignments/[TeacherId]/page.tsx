@@ -71,7 +71,7 @@ export default function TeacherClassesPage() {
 
   const [activeClassId, setActiveClassId] = useState<string | null>(null)
   const [activeClassName, setActiveClassName] = useState('')
-  const baseUrl = process.env.BASE_URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const id = localStorage.getItem('teacherId')

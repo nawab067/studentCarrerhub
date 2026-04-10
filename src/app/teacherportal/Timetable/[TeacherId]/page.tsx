@@ -69,7 +69,7 @@ function StatChip({ icon, label, value, accent }: {
     </div>
   );
 }
-const baseurl = process.env.BASE_URL;
+const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
 function ClassroomName({ id }: { id: string }) {
   const [name, setName] = useState<string>("…");
@@ -178,7 +178,7 @@ export default function TimetablePage() {
   const [sheetOpen, setSheetOpen]       = useState(false);
   const [collapsed, setCollapsed]       = useState(false);  
 
-  const baseurl = process.env.BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     if (typeof window === "undefined") return;

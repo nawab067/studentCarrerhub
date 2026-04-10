@@ -16,7 +16,7 @@ export default function EditcoursePageWrapper() {
     const router = useRouter();
     const params = useParams();
     const courseId = params.id as string;
-    const baseUrl = process.env.BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 
     async function getcourse(id: string) {

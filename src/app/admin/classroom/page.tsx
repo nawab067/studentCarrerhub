@@ -48,7 +48,7 @@ export default function ClassroomPage() {
   const [openClassroomId, setOpenClassroomId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   /* =======================
      FETCH CLASSROOMS + TEACHERS

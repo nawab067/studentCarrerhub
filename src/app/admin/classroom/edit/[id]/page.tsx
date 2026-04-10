@@ -14,7 +14,7 @@ export default function ClassroomEditPageWrapper() {
   const [classroomData, setClassroomData] = useState<classroom | null>(null);
   const [teachers, setTeachers] = useState<teacher[]>([]);
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   // Fetch teacher list
   const fetchTeachers = async () => {

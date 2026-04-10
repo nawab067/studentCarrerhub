@@ -14,7 +14,7 @@ export default function EditTeacherPage() {
   const params = useParams();
   const id = params?.id as string; 
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 
   async function getTeacher() {

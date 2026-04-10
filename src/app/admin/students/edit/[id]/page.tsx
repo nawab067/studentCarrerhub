@@ -13,7 +13,7 @@ export default function EditstudentPageWrapper() {
 
   const [loading, setLoading] = useState(false);
   const [studentData, setStudentData] = useState<Student| null>(null);
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   // Fetch student data on load
   async function getStudent() {

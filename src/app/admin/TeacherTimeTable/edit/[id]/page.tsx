@@ -26,7 +26,7 @@ export default function TeacherTimeTableEdit() {
   const router = useRouter();
   const params = useParams();
   const slotId = params?.id as string | undefined;
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     async function fetchAll() {
