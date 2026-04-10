@@ -20,6 +20,7 @@ export default function TeacherDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const totalClasses = assignedClasses.length;
   const [totalAssessments, setTotalAssessments] = useState<number>(0);
+   const [collapsed, setCollapsed] = useState(false);
 
   const totalStudents = Array.from(
     new Set(assignedClasses.flatMap((cls) => cls.students))
@@ -85,11 +86,14 @@ export default function TeacherDashboardPage() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Sidebar */}
-      <TeacherPortalSidebar />
+      <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 md:p-8 ml-0 md:ml-64">
-        {/* Header Section */}
+       <main
+  className={`transition-all duration-300 min-h-screen ${
+    collapsed ? "ml-16" : "ml-64"
+  }`}
+>
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
             Welcome Back, Teacher

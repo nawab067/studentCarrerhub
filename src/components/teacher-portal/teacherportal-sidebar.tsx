@@ -46,7 +46,15 @@ import {
 
 import { ChangePasswordDialog } from "@/components/teacher-portal/change-passworddilogue";
 
-export default function TeacherPortalSidebar() {
+type SidebarProps = {
+  collapsed: boolean;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export default function TeacherPortalSidebar({
+  collapsed,
+  setCollapsed,
+}: SidebarProps)  {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -168,14 +176,14 @@ const handleseeprofile = () => {
         variant="ghost"
         className={cn(
           "w-full justify-start gap-3 h-11 transition-all duration-200 text-white",
-          isCollapsed ? "px-2" : "px-3",
+          collapsed ? "md:w-16" : "md:w-64",
           isActive
             ? "bg-white/20 hover:bg-white/30 shadow-sm"
             : "hover:bg-white/10"
         )}
       >
         <Icon className={cn("h-5 w-5 flex-shrink-0")} />
-        {!isCollapsed && (
+        {!collapsed && (
           <>
             <span className="flex-1 text-left font-medium">{item.title}</span>
             {item.badge && (
@@ -229,15 +237,15 @@ const handleseeprofile = () => {
           "fixed left-0 top-0 z-40 h-screen bg-sky-500 text-white transition-all flex flex-col shadow-sm",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
-          isCollapsed ? "md:w-16" : "md:w-64"
+          collapsed ? "md:w-16" : "md:w-64"
         )}
       >
         {/* Header */}
         <div className={cn(
           "flex h-16 items-center border-b border-white/20 px-4",
-          isCollapsed ? "justify-center" : "justify-between"
+          collapsed ? "justify-center" : "justify-between"
         )}>
-          {!isCollapsed && (
+          {!collapsed && (
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
                 <GraduationCap className="h-5 w-5 text-white" />
@@ -245,7 +253,7 @@ const handleseeprofile = () => {
               <span className="font-semibold text-lg text-white">Teacher Portal</span>
             </div>
           )}
-          {isCollapsed && (
+          {collapsed && (
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
@@ -255,10 +263,10 @@ const handleseeprofile = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsCollapsed(!isCollapsed)}
+                onClick={() => setCollapsed(!collapsed)}
                 className="hidden md:flex h-8 w-8 text-white hover:bg-white/20"
               >
-                {isCollapsed ? (
+                {collapsed ? (
                   <PanelLeftOpen className="h-4 w-4" />
                 ) : (
                   <PanelLeftClose className="h-4 w-4" />
@@ -266,7 +274,7 @@ const handleseeprofile = () => {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              {collapsed ? "Expand sidebar" : "Collapse sidebar"}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -290,12 +298,12 @@ const handleseeprofile = () => {
                 variant="ghost"
                 className={cn(
                   "w-full h-auto transition-all duration-200 hover:bg-white/10 text-white",
-                  isCollapsed ? "p-2" : "p-3"
+                  collapsed ? "p-2" : "p-3"
                 )}
               >
                 <div className={cn(
                   "flex items-center gap-3 w-full",
-                  isCollapsed && "justify-center"
+                  collapsed && "justify-center"
                 )}>
                   <Avatar className="h-9 w-9 border-2 border-white/30">
                     <AvatarImage src="" alt="Teacher" />
@@ -304,7 +312,7 @@ const handleseeprofile = () => {
                     </AvatarFallback>
                   </Avatar>
 
-                  {!isCollapsed && (
+                  {!collapsed && (
                     <div className="flex flex-col flex-1 text-left">
                       <span className="text-sm font-medium">{teacherName}</span>
                       <span className="text-xs text-white/70 truncate">
@@ -323,7 +331,7 @@ const handleseeprofile = () => {
             <DropdownMenuContent 
               align="end" 
               className="w-56"
-              side={isCollapsed ? "right" : "top"}
+              side={collapsed ? "right" : "top"}
             >
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">

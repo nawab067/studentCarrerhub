@@ -175,6 +175,7 @@ export default function TimetablePage() {
   const [activeDay, setActiveDay]       = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [sheetOpen, setSheetOpen]       = useState(false);
+  const [collapsed, setCollapsed]       = useState(false);  
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -213,13 +214,13 @@ export default function TimetablePage() {
      */
     <div className="min-h-screen bg-[#f8f8fc] dark:bg-[#0d0d12]">
       {/* Sidebar — renders fixed internally */}
-      <TeacherPortalSidebar />
-
-      {/*
-        Main area pushed right by exactly the sidebar width.
-        Adjust 290px to match your actual sidebar width if different.
-      */}
-      <main className="pl-0 md:pl-[290px] min-h-screen overflow-x-hidden">
+      <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      
+               <main
+        className={`transition-all duration-300 min-h-screen ${
+          collapsed ? "ml-16" : "ml-64"
+        }`}
+      >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7">
 
           {/* ── Header ── */}

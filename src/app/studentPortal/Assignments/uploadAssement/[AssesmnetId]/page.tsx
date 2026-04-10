@@ -13,6 +13,11 @@ import {
   ExternalLink, RefreshCw,
 } from 'lucide-react';
 
+
+interface student{
+  _id: string;
+  name: string;
+}
 export default function UploadAssessmentPage() {
   const params = useParams();
   const AssesmentId = Array.isArray(params.AssesmnetId)
@@ -22,6 +27,7 @@ export default function UploadAssessmentPage() {
   const [studentId, setStudentId]       = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [assesmnet, setAssesmnet]       = useState<Assessment | null>(null);
+  const [studentid, setStudent]           = useState<student | null>(null);
   const [teacherName, setTeacherName]   = useState('');
   const [classroomname, setClassroomName] = useState('');
   const [studentName, setStudentName]   = useState('');
@@ -30,6 +36,7 @@ export default function UploadAssessmentPage() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [dragOver, setDragOver]         = useState(false);
+  const[loading, setLoading] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -116,27 +123,59 @@ export default function UploadAssessmentPage() {
     }
   };
 
-  const uploadAssesment = async () => {
-    if (!selectedFile || !assesmnet) return;
-    setUploading(true);
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-    formData.append('studentId', studentId || '');
-    formData.append('teacherId', assesmnet.teacherId);
-    formData.append('classroomId', assesmnet.classId);
-    try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/upload-assessment/${AssesmentId}`,
-        formData
-      );
-      setUploadSuccess(true);
-      setUploadedFile(response.data.file);
-    } catch (error) {
-      console.error('Upload failed', error);
-    } finally {
-      setUploading(false);
-    }
-  };
+  async function get_studentId() {
+  if (!studentId) return; // 🔥 important safeguard
+
+  try {
+    setLoading(true);
+    const response = await axios.get(
+      `http://127.0.0.1:8000/classes/student/user/id/${studentId}`
+    );
+
+    console.log("Student API Response:", response.data); // 👈 debug
+
+    setStudent(response.data);
+  } catch (error) {
+    console.error('Error fetching student data:', error);
+  } finally {
+    setLoading(false);
+  }
+}
+
+useEffect(() => {
+  if (!studentId) return;
+  get_studentId();
+}, [studentId]);
+
+ const uploadAssesment = async () => {
+  if (!selectedFile || !assesmnet || !studentid?._id) {
+    console.log("❌ Missing student ID", studentid);
+    return;
+  }
+
+  console.log("✅ Uploading with studentId:", studentid._id); // DEBUG
+
+  setUploading(true);
+
+  const formData = new FormData();
+  formData.append('image', selectedFile);
+  formData.append('studentId', studentid._id); // ✅ correct
+  formData.append('teacherId', assesmnet.teacherId);
+  formData.append('classroomId', assesmnet.classId);
+
+  try {
+    const response = await axios.post(
+      `http://127.0.0.1:8000/upload-assessment/${AssesmentId}`,
+      formData
+    );
+    setUploadSuccess(true);
+    setUploadedFile(response.data.file);
+  } catch (error) {
+    console.error('Upload failed', error);
+  } finally {
+    setUploading(false);
+  }
+};
 
   const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);

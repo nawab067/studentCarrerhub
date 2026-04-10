@@ -86,6 +86,7 @@ export default function AttendanceSheetPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<AttendanceState>({});
   const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -174,9 +175,13 @@ export default function AttendanceSheetPage() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <TeacherPortalSidebar />
-
-      <main className="flex-1 p-4 md:p-8 md:ml-64">
+      <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      
+               <main
+        className={`transition-all duration-300 min-h-screen ${
+          collapsed ? "ml-16" : "ml-64"
+        }`}
+      >
         {/* Back Button */}
         <Button
           variant="ghost"

@@ -21,6 +21,7 @@ export default function TeacherClassesPage() {
   const [assignedClasses, setAssignedClasses] = useState<AssignedClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
   // ✅ 1️⃣ READ teacherId from localStorage
@@ -83,9 +84,15 @@ export default function TeacherClassesPage() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <TeacherPortalSidebar />
+      <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className="flex-1 p-4 md:p-8 ml-0 md:ml-64">
+         <main
+  className={`transition-all duration-300 min-h-screen ${
+    collapsed ? "ml-16" : "ml-64"
+  }`}
+>
+
+      
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">

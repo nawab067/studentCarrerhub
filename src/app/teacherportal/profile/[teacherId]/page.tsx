@@ -22,6 +22,7 @@ export default function TeacherProfilePage() {
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [loading, setLoading] = useState(true);
   const [teacherId, setTeacherId] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
  useEffect(() => {
   const id = localStorage.getItem("teacherId");
@@ -49,9 +50,13 @@ useEffect(() => {
 
   return (
     <div className="flex min-h-screen bg-muted/40">
-      <TeacherPortalSidebar />
-
-      <main className="flex-1 ml-0 md:ml-64 p-6 md:p-10">
+     <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+     
+              <main
+       className={`transition-all duration-300 min-h-screen ${
+         collapsed ? "ml-16" : "ml-64"
+       }`}
+     >
         <h1 className="text-3xl font-bold mb-6">Teacher Profile</h1>
 
         {loading ? (

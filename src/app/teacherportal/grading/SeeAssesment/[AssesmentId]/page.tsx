@@ -47,6 +47,7 @@ export default function SeeAssessment() {
   const [loading, setLoading] = useState(true);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
 
   async function fetchAssessmentDetails() {
     try {
@@ -79,9 +80,13 @@ export default function SeeAssessment() {
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fc]">
-      <TeacherPortalSidebar />
-
-      <main className="flex-1 ml-0 md:ml-64 p-6 md:p-10">
+      <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      
+               <main
+        className={`transition-all duration-300 min-h-screen ${
+          collapsed ? "ml-16" : "ml-64"
+        }`}
+      >
         {/* ── Header ── */}
         <div className="mb-8">
           {/* Breadcrumb */}

@@ -64,6 +64,7 @@ export default function TeacherClassesPage() {
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [collapsed, setCollapsed] = useState(false)
 
   const [openDialog, setOpenDialog] = useState(false)
   const [openAddAssessment, setOpenAddAssessment] = useState(false)
@@ -151,9 +152,13 @@ export default function TeacherClassesPage() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <TeacherPortalSidebar />
-
-      <main className="flex-1 p-4 md:p-8 ml-0 md:ml-64">
+     <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+     
+              <main
+       className={`transition-all duration-300 min-h-screen ${
+         collapsed ? "ml-16" : "ml-64"
+       }`}
+     >
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
