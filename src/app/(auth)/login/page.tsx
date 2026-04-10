@@ -12,9 +12,9 @@ export default function LoginPage() {
   const router = useRouter();
 
   const baseUrl = process.env.BASE_URL;
-  console.log("Base URL:", baseUrl);
 
   async function handleLogin() {
+    console.log("Base URL:", baseUrl);
     try {
       setLoading(true);
 
