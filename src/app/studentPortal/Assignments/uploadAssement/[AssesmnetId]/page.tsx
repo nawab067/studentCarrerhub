@@ -126,7 +126,7 @@ export default function UploadAssessmentPage() {
   };
 
   async function get_studentId() {
-  if (!studentId) return; // 🔥 important safeguard
+  if (!studentId) return;
 
   try {
     setLoading(true);
@@ -134,7 +134,7 @@ export default function UploadAssessmentPage() {
       `${baseurl}/classes/student/user/id/${studentId}`
     );
 
-    console.log("Student API Response:", response.data); // 👈 debug
+    console.log("Student API Response:", response.data);
 
     setStudent(response.data);
   } catch (error) {
@@ -155,13 +155,13 @@ useEffect(() => {
     return;
   }
 
-  console.log("✅ Uploading with studentId:", studentid._id); // DEBUG
+  console.log("✅ Uploading with studentId:", studentid._id);
 
   setUploading(true);
 
   const formData = new FormData();
   formData.append('image', selectedFile);
-  formData.append('studentId', studentid._id); // ✅ correct
+  formData.append('studentId', studentid._id);
   formData.append('teacherId', assesmnet.teacherId);
   formData.append('classroomId', assesmnet.classId);
 
@@ -213,7 +213,6 @@ useEffect(() => {
             radial-gradient(ellipse 50% 40% at 90% 105%, rgba(168,85,247,0.04) 0%, transparent 60%);
         }
 
-        /* ── Enter animations ── */
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -223,11 +222,9 @@ useEffect(() => {
         .enter-3 { animation: fadeUp 0.38s ease 0.20s forwards; opacity: 0; }
         .enter-4 { animation: fadeUp 0.38s ease 0.28s forwards; opacity: 0; }
 
-        /* ── Breadcrumb ── */
-        .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #94a3b8; }
+        .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #94a3b8; flex-wrap: wrap; }
         .breadcrumb span.active { color: #1e293b; font-weight: 600; }
 
-        /* ── Section card ── */
         .section-card {
           background: #ffffff;
           border: 1px solid #e8ecf4;
@@ -238,6 +235,7 @@ useEffect(() => {
           padding: 18px 22px 16px;
           border-bottom: 1px solid #f1f5f9;
           display: flex; align-items: center; gap: 10px;
+          flex-wrap: wrap;
         }
         .section-icon {
           width: 32px; height: 32px; border-radius: 9px;
@@ -246,7 +244,6 @@ useEffect(() => {
         .section-title { font-size: 13px; font-weight: 650; color: #0f172a; letter-spacing: -0.1px; }
         .section-subtitle { font-size: 11.5px; color: #94a3b8; margin-top: 1px; }
 
-        /* ── Drop zone ── */
         .drop-zone {
           border: 2px dashed #dde3ef;
           border-radius: 14px;
@@ -270,7 +267,6 @@ useEffect(() => {
           background: #f0fdf4;
         }
 
-        /* ── Submit button ── */
         .submit-btn {
           width: 100%;
           padding: 13px 20px;
@@ -298,7 +294,6 @@ useEffect(() => {
           background: #e8ecf4; color: #94a3b8; cursor: not-allowed; box-shadow: none;
         }
 
-        /* ── Person chip ── */
         .person-chip {
           display: flex; align-items: center; gap: 12px; padding: 14px 22px;
         }
@@ -310,7 +305,6 @@ useEffect(() => {
         .person-name { font-size: 13.5px; font-weight: 600; color: #0f172a; }
         .person-role { font-size: 11px; color: #94a3b8; margin-top: 1px; }
 
-        /* ── Meta detail row ── */
         .meta-row { display: flex; align-items: center; gap: 8px; padding: 13px 22px; border-top: 1px solid #f1f5f9; }
         .meta-icon-wrap {
           width: 28px; height: 28px; border-radius: 8px;
@@ -319,19 +313,17 @@ useEffect(() => {
         .meta-label { font-size: 10px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
         .meta-value { font-size: 12.5px; color: #1e293b; font-weight: 600; }
 
-        /* ── Status badge ── */
         .status-badge {
           display: inline-flex; align-items: center; gap: 6px;
           padding: 5px 12px; border-radius: 999px;
           font-size: 12px; font-weight: 600; border: 1px solid;
           font-family: 'DM Mono', monospace;
+          white-space: nowrap;
         }
 
-        /* ── Spinning loader ── */
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { animation: spin 0.7s linear infinite; }
 
-        /* ── View link ── */
         .view-link {
           display: inline-flex; align-items: center; gap: 5px;
           font-size: 12px; font-weight: 600; color: #6366f1;
@@ -339,14 +331,12 @@ useEffect(() => {
         }
         .view-link:hover { color: #4338ca; }
 
-        /* ── Progress bar ── */
         @keyframes progressFill {
           from { width: 0%; }
           to   { width: 100%; }
         }
         .progress-bar { animation: progressFill 1.2s ease forwards; }
 
-        /* ── Stat strip ── */
         .stat-strip {
           display: flex; align-items: center;
           background: #ffffff; border: 1px solid #e8ecf4;
@@ -357,39 +347,116 @@ useEffect(() => {
           display: flex; flex-direction: column; align-items: center; gap: 2px;
         }
         .stat-cell:last-child { border-right: none; }
+
+        /* ── MAIN LAYOUT ── */
+        .main-content {
+          transition: margin-left 0.3s;
+          min-height: 100vh;
+        }
+
+        /* Topbar */
+        .topbar {
+          position: sticky; top: 0; z-index: 20;
+          background: rgba(244,246,251,0.93);
+          backdrop-filter: blur(14px);
+          border-bottom: 1px solid #e2e8f0;
+          padding: 18px 32px;
+          display: flex; align-items: center; justify-content: space-between;
+          gap: 12px;
+        }
+
+        /* Body grid: left + right sidebar */
+        .body-grid {
+          padding: 28px 32px;
+          display: grid;
+          grid-template-columns: 1fr 320px;
+          gap: 20px;
+          align-items: start;
+        }
+
+        /* ── LARGE SCREENS: sidebar offset ── */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+
+        /* ── TABLET (641–1024px) ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+          .topbar { padding: 16px 20px; }
+          .body-grid {
+            padding: 20px;
+            grid-template-columns: 1fr;
+          }
+        }
+
+        /* ── MOBILE (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+
+          .topbar {
+            padding: 12px 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+          .topbar-left { gap: 10px !important; }
+          .topbar-icon { width: 36px !important; height: 36px !important; }
+          .topbar h1 { font-size: 16px !important; }
+          .breadcrumb { font-size: 11px; }
+
+          .body-grid {
+            padding: 14px 12px;
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+
+          .section-card-header { padding: 14px 16px 12px; }
+          .section-card-header .status-badge { margin-left: 0 !important; margin-top: 6px; width: 100%; justify-content: center; }
+
+          .drop-zone { padding: 28px 16px; }
+
+          .person-chip { padding: 12px 16px; }
+          .meta-row { padding: 11px 16px; }
+
+          .status-badge { font-size: 11px; padding: 4px 10px; }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <main
-        className={`transition-all duration-300 min-h-screen page-bg ${collapsed ? 'ml-20' : 'ml-64'}`}
+        className={`main-content page-bg ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}
       >
         {/* ══════════ STICKY TOP BAR ══════════ */}
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 20,
-          background: 'rgba(244,246,251,0.93)',
-          backdropFilter: 'blur(14px)',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '18px 32px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
+        <div className="topbar">
           {/* Left: icon + breadcrumb + title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{
-              width: 42, height: 42, borderRadius: 11, flexShrink: 0,
-              background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 5px 18px rgba(99,102,241,.28)',
-            }}>
+          <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
+            <div
+              className="topbar-icon"
+              style={{
+                width: 42, height: 42, borderRadius: 11, flexShrink: 0,
+                background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 5px 18px rgba(99,102,241,.28)',
+              }}
+            >
               <FileText style={{ width: 18, height: 18, color: '#fff' }} />
             </div>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div className="breadcrumb">
                 <span>Assignments</span>
-                <ChevronRight style={{ width: 12, height: 12 }} />
-                <span className="active">{assesmnet?.name || '…'}</span>
+                <ChevronRight style={{ width: 12, height: 12, flexShrink: 0 }} />
+                <span className="active" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>
+                  {assesmnet?.name || '…'}
+                </span>
               </div>
-              <h1 style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.3px', marginTop: 2 }}>
+              <h1 className="topbar" style={{
+                fontSize: 19, fontWeight: 700, color: '#0f172a',
+                letterSpacing: '-0.3px', marginTop: 2,
+                background: 'none', backdropFilter: 'none',
+                border: 'none', padding: 0, position: 'static',
+                display: 'block',
+              }}>
                 Submit Assignment
               </h1>
             </div>
@@ -411,7 +478,7 @@ useEffect(() => {
         </div>
 
         {/* ══════════ BODY ══════════ */}
-        <div style={{ padding: '28px 32px', display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, alignItems: 'start' }}>
+        <div className="body-grid">
 
           {/* ════ LEFT COLUMN ════ */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -451,7 +518,6 @@ useEffect(() => {
                 </p>
               </div>
 
-              {/* Due date meta */}
               {assesmnet?.dueDate && (
                 <div className="meta-row" style={{ borderTop: '1px solid #f1f5f9' }}>
                   <div className="meta-icon-wrap" style={{ background: dueStatus?.bg || '#f1f5f9' }}>
@@ -501,7 +567,6 @@ useEffect(() => {
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleDrop}
                 >
-                  {/* Success state — already submitted, nothing new selected */}
                   {uploadSuccess && !selectedFile ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
                       <div style={{
@@ -529,7 +594,6 @@ useEffect(() => {
                       )}
                     </div>
                   ) : selectedFile ? (
-                    /* File selected state */
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
                       <div style={{
                         width: 52, height: 52, borderRadius: 14, background: '#e0e7ff',
@@ -556,7 +620,6 @@ useEffect(() => {
                       </button>
                     </div>
                   ) : (
-                    /* Empty idle state */
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
                       <div style={{
                         width: 52, height: 52, borderRadius: 14, background: '#f1f5f9',
@@ -602,7 +665,6 @@ useEffect(() => {
                   )}
                 </button>
 
-                {/* Uploading progress bar */}
                 {uploading && (
                   <div style={{ height: 4, background: '#e8ecf4', borderRadius: 999, overflow: 'hidden' }}>
                     <div
@@ -645,10 +707,10 @@ useEffect(() => {
                 <span style={{
                   fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
                   background: '#eef2ff', color: '#6366f1', fontFamily: "'DM Mono',monospace",
+                  flexShrink: 0,
                 }}>You</span>
               </div>
 
-              {/* Divider */}
               <div style={{ height: 1, background: '#f1f5f9', margin: '0 22px' }} />
 
               {/* Teacher */}
