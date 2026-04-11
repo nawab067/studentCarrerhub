@@ -36,7 +36,7 @@ export default function StudentGradesDetailPage() {
   const [open, setOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const baseurl= process.env.NEXT_PUBLIC_BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
   useEffect(() => {
     const storedId = localStorage.getItem("studentId");
@@ -219,6 +219,7 @@ export default function StudentGradesDetailPage() {
         .stat-chip {
           display: flex; flex-direction: column; align-items: center; gap: 2px;
           padding: 10px 20px; border-right: 1px solid #e8ecf4;
+          flex: 1;
         }
         .stat-chip:last-child { border-right: none; }
 
@@ -228,11 +229,152 @@ export default function StudentGradesDetailPage() {
           opacity: 0.25; margin-bottom: 32px;
         }
         .ghost-card { height: 40px; background: #dde2ec; border-radius: 8px; }
+
+        /* ── MAIN LAYOUT ── */
+        .main-content {
+          transition: margin-left 0.3s;
+          min-height: 100vh;
+        }
+
+        /* ── LARGE SCREENS: sidebar offset ── */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+
+        /* ── Header layout ── */
+        .header-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 32px 16px;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .search-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 32px 16px;
+        }
+
+        .accent-line {
+          display: none; /* not used in this page but kept for consistency */
+        }
+
+        /* ── Stats strip ── */
+        .stats-strip {
+          display: flex;
+          background: #fff;
+          border: 1px solid #e8ecf4;
+          border-radius: 12px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        /* ── Content padding ── */
+        .content-padding {
+          padding: 28px 32px;
+          min-height: calc(100vh - 160px);
+        }
+
+        /* ── Hide description & date columns on mobile — show cards instead ── */
+        .col-desc { }
+        .col-date { }
+
+        /* ── Mobile card layout (replaces table on small screens) ── */
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; }
+
+        /* ── TABLET (641–1024px) ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+
+          .header-top { padding: 20px 20px 14px; }
+          .search-row { padding: 0 20px 14px; }
+          .content-padding { padding: 20px; }
+
+          /* Hide description column on tablet to save space */
+          .col-desc { display: none; }
+        }
+
+        /* ── MOBILE (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+
+          .header-top {
+            padding: 14px 16px 12px;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .header-top h1 { font-size: 18px !important; }
+
+          .stats-strip { width: 100%; }
+
+          .stat-chip { padding: 8px 10px; }
+
+          .search-row {
+            padding: 0 16px 12px;
+          }
+
+          .search-wrap { max-width: 100% !important; }
+
+          .content-padding { padding: 14px 12px; }
+
+          /* Switch from table to card layout on mobile */
+          .desktop-table { display: none; }
+          .mobile-cards { display: flex; flex-direction: column; gap: 10px; }
+
+          .mobile-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e8ecf4;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .mobile-card-body {
+            display: flex;
+            gap: 12px;
+            padding: 14px 14px 12px;
+            align-items: flex-start;
+          }
+
+          .mobile-card-icon {
+            width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+          }
+
+          .mobile-card-info { flex: 1; min-width: 0; }
+
+          .mobile-card-footer {
+            padding: 10px 14px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+
+          .mobile-card-strip {
+            height: 3px;
+            position: relative;
+            overflow: hidden;
+            background: #f1f5f9;
+          }
+
+          /* Table footer stays as is */
+          .table-footer {
+            padding: 12px 16px !important;
+          }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`main-content ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
 
         {/* ══════════ STICKY HEADER ══════════ */}
         <div style={{
@@ -241,7 +383,8 @@ export default function StudentGradesDetailPage() {
           backdropFilter: 'blur(14px)',
           borderBottom: '1px solid #e2e8f0',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px 16px' }}>
+          {/* Title row */}
+          <div className="header-top">
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12, flexShrink: 0,
@@ -273,14 +416,11 @@ export default function StudentGradesDetailPage() {
 
             {/* Stats strip */}
             {!loading && assessments.length > 0 && (
-              <div style={{
-                display: 'flex', background: '#fff',
-                border: '1px solid #e8ecf4', borderRadius: 12, overflow: 'hidden',
-              }}>
+              <div className="stats-strip">
                 {([
-                  { label: 'Total',    value: assessments.length, color: '#6366f1' },
-                  { label: 'Graded',   value: assessments.length, color: '#16a34a' },
-                  { label: 'Pending',  value: 0,                  color: '#d97706' },
+                  { label: 'Total',   value: assessments.length, color: '#6366f1' },
+                  { label: 'Graded',  value: assessments.length, color: '#16a34a' },
+                  { label: 'Pending', value: 0,                  color: '#d97706' },
                 ] as const).map(s => (
                   <div key={s.label} className="stat-chip">
                     <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }}>
@@ -296,7 +436,7 @@ export default function StudentGradesDetailPage() {
           </div>
 
           {/* Search row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 32px 16px' }}>
+          <div className="search-row">
             <div className="search-wrap" style={{ maxWidth: 320, width: '100%' }}>
               <Search className="search-icon" style={{ width: 15, height: 15, color: '#94a3b8' }} />
               <input
@@ -310,18 +450,16 @@ export default function StudentGradesDetailPage() {
         </div>
 
         {/* ══════════ CONTENT ══════════ */}
-        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 160px)' }}>
+        <div className="page-bg content-padding">
 
           {/* ── Skeleton ── */}
           {loading && (
             <div className="table-wrap">
-              {/* Fake header */}
               <div className="tbl-head" style={{ display: 'flex', gap: 16, padding: '13px 20px' }}>
-                {['30%','40%','15%','10%'].map((w, i) => (
+                {['30%', '40%', '15%', '10%'].map((w, i) => (
                   <div key={i} className="skel" style={{ height: 14, width: w }} />
                 ))}
               </div>
-              {/* Fake rows */}
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} style={{ display: 'flex', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9' }}>
                   <div className="skel" style={{ height: 14, width: '30%' }} />
@@ -333,114 +471,174 @@ export default function StudentGradesDetailPage() {
             </div>
           )}
 
-          {/* ── Table ── */}
+          {/* ── Desktop Table ── */}
           {!loading && filtered.length > 0 && (
-            <div className="table-wrap">
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead className="tbl-head">
-                  <tr>
-                    <th className="tbl-th" style={{ width: 48 }}>#</th>
-                    <th className="tbl-th">Assessment Name</th>
-                    <th className="tbl-th">Description</th>
-                    <th className="tbl-th" style={{ whiteSpace: 'nowrap' }}>Created</th>
-                    <th className="tbl-th" style={{ textAlign: 'right' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((item, i) => {
-                    const color = subjectColors[i % subjectColors.length];
-                    return (
-                      <tr
-                        key={item._id}
-                        className={`tbl-row row-enter`}
-                        style={{ animationDelay: `${i * 40}ms` }}
-                      >
-                        {/* Index */}
-                        <td className="tbl-td" style={{ paddingRight: 8 }}>
-                          <div
-                            className="index-badge"
-                            style={{ background: color.light, color: color.mid }}
-                          >
-                            {String(i + 1).padStart(2, '0')}
-                          </div>
-                        </td>
-
-                        {/* Name */}
-                        <td className="tbl-td">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{
-                              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                              background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                              <FileText style={{ width: 14, height: 14, color: color.mid }} />
+            <>
+              {/* Desktop / Tablet */}
+              <div className="table-wrap desktop-table">
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead className="tbl-head">
+                    <tr>
+                      <th className="tbl-th" style={{ width: 48 }}>#</th>
+                      <th className="tbl-th">Assessment Name</th>
+                      <th className="tbl-th col-desc">Description</th>
+                      <th className="tbl-th col-date" style={{ whiteSpace: 'nowrap' }}>Created</th>
+                      <th className="tbl-th" style={{ textAlign: 'right' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((item, i) => {
+                      const color = subjectColors[i % subjectColors.length];
+                      return (
+                        <tr
+                          key={item._id}
+                          className="tbl-row row-enter"
+                          style={{ animationDelay: `${i * 40}ms` }}
+                        >
+                          <td className="tbl-td" style={{ paddingRight: 8 }}>
+                            <div className="index-badge" style={{ background: color.light, color: color.mid }}>
+                              {String(i + 1).padStart(2, '0')}
                             </div>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>
-                              {item.name}
+                          </td>
+                          <td className="tbl-td">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{
+                                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                                background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}>
+                                <FileText style={{ width: 14, height: 14, color: color.mid }} />
+                              </div>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>
+                                {item.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="tbl-td col-desc" style={{ maxWidth: 280 }}>
+                            <span style={{
+                              display: '-webkit-box', WebkitLineClamp: 1,
+                              WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                              color: '#64748b', fontSize: 12,
+                            }}>
+                              {item.description}
                             </span>
-                          </div>
-                        </td>
+                          </td>
+                          <td className="tbl-td col-date">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <Calendar style={{ width: 12, height: 12, color: '#94a3b8', flexShrink: 0 }} />
+                              <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: '#64748b' }}>
+                                {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="tbl-td" style={{ textAlign: 'right' }}>
+                            <button className="view-btn" onClick={() => handleView(item._id)}>
+                              <Eye style={{ width: 13, height: 13 }} />
+                              View Grades
+                              <ArrowUpRight className="btn-arrow" style={{ width: 12, height: 12 }} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
 
-                        {/* Description */}
-                        <td className="tbl-td" style={{ maxWidth: 280 }}>
-                          <span style={{
-                            display: '-webkit-box', WebkitLineClamp: 1,
+                {/* Table footer */}
+                <div className="table-footer" style={{
+                  padding: '12px 20px',
+                  background: '#f8fafc',
+                  borderTop: '1px solid #e8ecf4',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: "'DM Mono', monospace" }}>
+                    Showing {filtered.length} of {assessments.length} assessments
+                  </span>
+                  {search && (
+                    <button
+                      onClick={() => setSearch('')}
+                      style={{
+                        fontSize: 12, color: '#6366f1', fontWeight: 600, background: 'none',
+                        border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      Clear search
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Mobile Card Layout ── */}
+              <div className="mobile-cards">
+                {filtered.map((item, i) => {
+                  const color = subjectColors[i % subjectColors.length];
+                  return (
+                    <div key={item._id} className="mobile-card" style={{ animationDelay: `${i * 40}ms` }}>
+                      <div className="mobile-card-body">
+                        <div className="mobile-card-icon" style={{ background: color.light }}>
+                          <FileText style={{ width: 16, height: 16, color: color.mid }} />
+                        </div>
+                        <div className="mobile-card-info">
+                          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>
+                            {item.name}
+                          </div>
+                          <div style={{
+                            fontSize: 12, color: '#64748b', lineHeight: 1.4,
+                            display: '-webkit-box', WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                            color: '#64748b', fontSize: 12,
                           }}>
                             {item.description}
-                          </span>
-                        </td>
-
-                        {/* Date */}
-                        <td className="tbl-td">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Calendar style={{ width: 12, height: 12, color: '#94a3b8', flexShrink: 0 }} />
-                            <span style={{ fontSize: 12, fontFamily: "'DM Mono', monospace", color: '#64748b' }}>
-                              {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </span>
                           </div>
-                        </td>
+                        </div>
+                        <div className="index-badge" style={{ background: color.light, color: color.mid, alignSelf: 'flex-start' }}>
+                          {String(i + 1).padStart(2, '0')}
+                        </div>
+                      </div>
 
-                        {/* Action */}
-                        <td className="tbl-td" style={{ textAlign: 'right' }}>
-                          <button
-                            className="view-btn"
-                            onClick={() => handleView(item._id)}
-                          >
-                            <Eye style={{ width: 13, height: 13 }} />
-                            View Grades
-                            <ArrowUpRight className="btn-arrow" style={{ width: 12, height: 12 }} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      <div className="mobile-card-footer">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <Calendar style={{ width: 11, height: 11, color: '#94a3b8' }} />
+                          <span style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: '#64748b' }}>
+                            {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <button className="view-btn" onClick={() => handleView(item._id)}>
+                          <Eye style={{ width: 12, height: 12 }} />
+                          View Grades
+                        </button>
+                      </div>
 
-              {/* Table footer */}
-              <div style={{
-                padding: '12px 20px',
-                background: '#f8fafc',
-                borderTop: '1px solid #e8ecf4',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              }}>
-                <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: "'DM Mono', monospace" }}>
-                  Showing {filtered.length} of {assessments.length} assessments
-                </span>
-                {search && (
-                  <button
-                    onClick={() => setSearch('')}
-                    style={{
-                      fontSize: 12, color: '#6366f1', fontWeight: 600, background: 'none',
-                      border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-                    }}
-                  >
-                    Clear search
-                  </button>
-                )}
+                      <div className="mobile-card-strip">
+                        <div style={{
+                          position: 'absolute', inset: 0, background: color.bar,
+                          opacity: 0.5, width: `${35 + (i % 4) * 18}%`,
+                        }} />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Mobile footer */}
+                <div style={{
+                  padding: '10px 4px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: "'DM Mono', monospace" }}>
+                    {filtered.length} of {assessments.length} assessments
+                  </span>
+                  {search && (
+                    <button
+                      onClick={() => setSearch('')}
+                      style={{
+                        fontSize: 12, color: '#6366f1', fontWeight: 600, background: 'none',
+                        border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      Clear search
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* ── No search results ── */}

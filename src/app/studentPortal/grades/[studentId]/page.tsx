@@ -102,21 +102,127 @@ export default function StudentGradesPage() {
         }
         .card-enter { animation: cardIn 0.38s cubic-bezier(.22,.68,0,1.1) forwards; opacity: 0; }
         .subject-bar { width: 4px; border-radius: 0 4px 4px 0; flex-shrink: 0; align-self: stretch; }
+
         .stat-chip {
           display: flex; flex-direction: column; align-items: center; gap: 2px;
           padding: 10px 20px; border-right: 1px solid #e8ecf4;
+          flex: 1;
         }
         .stat-chip:last-child { border-right: none; }
+
         .empty-ghost {
           display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
           opacity: 0.25; margin-bottom: 32px;
         }
         .ghost-card { height: 130px; background: #dde2ec; border-radius: 12px; }
+
+        /* ── MAIN LAYOUT ── */
+        .main-content {
+          transition: margin-left 0.3s;
+          min-height: 100vh;
+        }
+
+        /* ── LARGE SCREENS: sidebar offset ── */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+
+        /* ── Header layout ── */
+        .header-inner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 32px 16px;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .accent-line {
+          height: 1px;
+          background: linear-gradient(90deg, #e8ecf4, transparent);
+          margin: 0 32px;
+        }
+
+        /* ── Stats strip ── */
+        .stats-strip {
+          display: flex;
+          background: #fff;
+          border: 1px solid #e8ecf4;
+          border-radius: 12px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        /* ── Cards grid ── */
+        .cards-grid {
+          display: grid;
+          gap: 16px;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+
+        /* ── Content padding ── */
+        .content-padding {
+          padding: 28px 32px;
+          min-height: calc(100vh - 140px);
+        }
+
+        /* ── TABLET (641–1024px) ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+
+          .header-inner {
+            padding: 20px 20px 14px;
+          }
+
+          .accent-line { margin: 0 20px; }
+
+          .content-padding {
+            padding: 20px;
+          }
+
+          .cards-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          }
+        }
+
+        /* ── MOBILE (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+
+          .header-inner {
+            padding: 14px 16px 12px;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .header-inner h1 {
+            font-size: 18px !important;
+          }
+
+          .stats-strip {
+            width: 100%;
+          }
+
+          .stat-chip {
+            padding: 8px 10px;
+          }
+
+          .accent-line { margin: 0 16px; }
+
+          .content-padding {
+            padding: 14px 12px;
+          }
+
+          .cards-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`main-content ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
 
         {/* ══════════ STICKY HEADER ══════════ */}
         <div style={{
@@ -125,7 +231,7 @@ export default function StudentGradesPage() {
           backdropFilter: 'blur(14px)',
           borderBottom: '1px solid #e2e8f0',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px 16px' }}>
+          <div className="header-inner">
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12, flexShrink: 0,
@@ -157,10 +263,7 @@ export default function StudentGradesPage() {
 
             {/* Stats strip */}
             {!loading && classes.length > 0 && (
-              <div style={{
-                display: 'flex', background: '#fff',
-                border: '1px solid #e8ecf4', borderRadius: 12, overflow: 'hidden',
-              }}>
+              <div className="stats-strip">
                 {([
                   { label: 'Classes',  value: classes.length, color: '#6366f1' },
                   { label: 'Active',   value: classes.length, color: '#16a34a' },
@@ -179,16 +282,16 @@ export default function StudentGradesPage() {
             )}
           </div>
 
-          <div style={{ height: 1, background: 'linear-gradient(90deg,#e8ecf4,transparent)', margin: '0 32px' }} />
+          <div className="accent-line" />
           <div style={{ height: 16 }} />
         </div>
 
         {/* ══════════ CONTENT ══════════ */}
-        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 140px)' }}>
+        <div className="page-bg content-padding">
 
           {/* Skeletons */}
           {loading && (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+            <div className="cards-grid">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="skel" style={{ height: 190 }} />
               ))}
@@ -197,7 +300,7 @@ export default function StudentGradesPage() {
 
           {/* Cards */}
           {!loading && classes.length > 0 && (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+            <div className="cards-grid">
               {classes.map((item, i) => {
                 const color = subjectColors[i % subjectColors.length];
                 return (
