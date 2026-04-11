@@ -10,7 +10,6 @@ import {
   BookOpen,
   GraduationCap,
   ArrowUpRight,
-  ChevronRight,
 } from 'lucide-react';
 
 interface Classroom {
@@ -26,7 +25,6 @@ export default function StudentAttendancePage() {
   const [collapsed, setCollapsed] = useState(false);
 
   const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
-
   const router = useRouter();
 
   useEffect(() => {
@@ -47,7 +45,6 @@ export default function StudentAttendancePage() {
     }
   };
 
-  // Matches the subjectColors palette from assignments page
   const subjectColors = [
     { light: '#eef2ff', mid: '#818cf8', bar: 'linear-gradient(135deg,#6366f1,#818cf8)' },
     { light: '#fdf4ff', mid: '#c084fc', bar: 'linear-gradient(135deg,#a855f7,#c084fc)' },
@@ -69,7 +66,6 @@ export default function StudentAttendancePage() {
             radial-gradient(ellipse 60% 40% at 80% 110%, rgba(168,85,247,0.04) 0%, transparent 60%);
         }
 
-        /* ── Card ── */
         .att-card {
           background: #fff;
           border-radius: 16px;
@@ -94,7 +90,6 @@ export default function StudentAttendancePage() {
         }
         .att-card:hover .card-arrow { opacity: 1; transform: translate(0, 0); }
 
-        /* ── Shimmer skeleton ── */
         @keyframes shimmer {
           0%   { background-position: -600px 0; }
           100% { background-position:  600px 0; }
@@ -107,34 +102,119 @@ export default function StudentAttendancePage() {
           border: 1px solid #e8ecf4;
         }
 
-        /* ── Staggered card entrance ── */
         @keyframes cardIn {
           from { opacity: 0; transform: translateY(18px) scale(0.98); }
           to   { opacity: 1; transform: translateY(0)    scale(1);    }
         }
         .card-enter { animation: cardIn 0.38s cubic-bezier(.22,.68,0,1.1) forwards; opacity: 0; }
 
-        /* ── Side color bar ── */
         .subject-bar { width: 4px; border-radius: 0 4px 4px 0; flex-shrink: 0; align-self: stretch; }
 
-        /* ── Ghost cards for empty state ── */
         .empty-ghost {
           display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
           opacity: 0.25; margin-bottom: 32px;
         }
         .ghost-card { height: 130px; background: #dde2ec; border-radius: 12px; }
 
-        /* ── Stat chip ── */
         .stat-chip {
           display: flex; flex-direction: column; align-items: center; gap: 2px;
           padding: 10px 20px; border-right: 1px solid #e8ecf4;
+          flex: 1;
         }
         .stat-chip:last-child { border-right: none; }
+
+        /* ── MAIN LAYOUT ── */
+        .main-content {
+          transition: margin-left 0.3s;
+          min-height: 100vh;
+        }
+
+        /* Header rows */
+        .header-title-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 32px 16px;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .stats-strip {
+          display: flex;
+          background: #fff;
+          border: 1px solid #e8ecf4;
+          border-radius: 12px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        .accent-line {
+          height: 1px;
+          background: linear-gradient(90deg, #e8ecf4, transparent);
+          margin: 0 32px;
+        }
+
+        .cards-grid {
+          display: grid;
+          gap: 16px;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+
+        .content-padding {
+          padding: 28px 32px;
+          min-height: calc(100vh - 140px);
+        }
+
+        /* ── LARGE SCREENS: sidebar offset ── */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+
+        /* ── TABLET (641–1024px) ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+          .header-title-row { padding: 20px 20px 14px; }
+          .accent-line { margin: 0 20px; }
+          .content-padding { padding: 20px; }
+          .cards-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+        }
+
+        /* ── MOBILE (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+
+          .header-title-row {
+            padding: 14px 16px 12px;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .header-title-row h1 { font-size: 18px !important; }
+
+          .stats-strip {
+            width: 100%;
+          }
+
+          .stat-chip {
+            padding: 8px 10px;
+          }
+
+          .accent-line { margin: 0 16px; }
+
+          .content-padding {
+            padding: 14px 12px;
+          }
+
+          .cards-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`main-content ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
 
         {/* ══════════ STICKY HEADER ══════════ */}
         <div
@@ -146,9 +226,8 @@ export default function StudentAttendancePage() {
           }}
         >
           {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px 16px' }}>
+          <div className="header-title-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {/* Icon badge — matches assignments page gradient icon */}
               <div style={{
                 width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                 background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)',
@@ -178,16 +257,13 @@ export default function StudentAttendancePage() {
               </div>
             </div>
 
-            {/* Stats strip — mirrors assignments page */}
+            {/* Stats strip */}
             {!loading && classrooms.length > 0 && (
-              <div style={{
-                display: 'flex', background: '#fff',
-                border: '1px solid #e8ecf4', borderRadius: 12, overflow: 'hidden',
-              }}>
+              <div className="stats-strip">
                 {([
-                  { label: 'Enrolled',  value: classrooms.length,                                                    color: '#6366f1' },
-                  { label: 'Active',    value: classrooms.length,                                                    color: '#16a34a' },
-                  { label: 'Subjects',  value: classrooms.length,                                                    color: '#d97706' },
+                  { label: 'Enrolled', value: classrooms.length, color: '#6366f1' },
+                  { label: 'Active',   value: classrooms.length, color: '#16a34a' },
+                  { label: 'Subjects', value: classrooms.length, color: '#d97706' },
                 ] as const).map(s => (
                   <div key={s.label} className="stat-chip">
                     <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }}>
@@ -202,26 +278,25 @@ export default function StudentAttendancePage() {
             )}
           </div>
 
-          {/* Thin accent line under title row */}
-          <div style={{ height: 1, background: 'linear-gradient(90deg,#e8ecf4,transparent)', margin: '0 32px' }} />
+          <div className="accent-line" />
           <div style={{ height: 16 }} />
         </div>
 
         {/* ══════════ CONTENT ══════════ */}
-        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 140px)' }}>
+        <div className="page-bg content-padding">
 
-          {/* ── Skeletons ── */}
+          {/* Skeletons */}
           {loading && (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+            <div className="cards-grid">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="skel" style={{ height: 190 }} />
               ))}
             </div>
           )}
 
-          {/* ── Classroom Cards ── */}
+          {/* Classroom Cards */}
           {!loading && classrooms.length > 0 && (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+            <div className="cards-grid">
               {classrooms.map((classroom, i) => {
                 const color = subjectColors[i % subjectColors.length];
 
@@ -233,7 +308,6 @@ export default function StudentAttendancePage() {
                       onMouseEnter={() => setHoveredId(classroom._id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
-                      {/* Left color bar + content — same layout as assignment cards */}
                       <div style={{ display: 'flex', flex: 1 }}>
                         <div className="subject-bar" style={{ background: color.bar }} />
 
@@ -270,7 +344,6 @@ export default function StudentAttendancePage() {
                             marginTop: 'auto',
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           }}>
-                            {/* Classroom index badge */}
                             <span style={{
                               fontSize: 11, fontFamily: "'DM Mono', monospace", fontWeight: 500,
                               background: color.light, color: color.mid,
@@ -287,7 +360,7 @@ export default function StudentAttendancePage() {
                         </div>
                       </div>
 
-                      {/* Progress strip at bottom — mirrors assignments page */}
+                      {/* Progress strip */}
                       <div style={{ height: 3, background: '#f1f5f9', position: 'relative', overflow: 'hidden' }}>
                         <div style={{
                           position: 'absolute', inset: 0,
@@ -303,10 +376,9 @@ export default function StudentAttendancePage() {
             </div>
           )}
 
-          {/* ── Empty state ── */}
+          {/* Empty state */}
           {!loading && classrooms.length === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px', textAlign: 'center' }}>
-              {/* Ghost grid — same as assignments empty state */}
               <div className="empty-ghost" style={{ width: 280 }}>
                 {Array.from({ length: 6 }).map((_, i) => <div key={i} className="ghost-card" />)}
               </div>
