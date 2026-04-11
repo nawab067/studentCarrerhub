@@ -11,8 +11,6 @@ import {
   User,
   School,
   BookOpen,
-  ChevronRight,
-  ArrowUpRight,
 } from 'lucide-react';
 
 /* ------------------ Types ------------------ */
@@ -37,7 +35,7 @@ interface TimeTableSlot {
   roomno?: string;
 }
 
-/* ------------------ Color Palette (matches attendance page) ------------------ */
+/* ------------------ Color Palette ------------------ */
 const subjectColors = [
   { light: '#eef2ff', mid: '#818cf8', bar: 'linear-gradient(135deg,#6366f1,#818cf8)' },
   { light: '#fdf4ff', mid: '#c084fc', bar: 'linear-gradient(135deg,#a855f7,#c084fc)' },
@@ -58,16 +56,14 @@ export default function StudentClassesPage() {
   const [timeTableSlots, setTimeTableSlots] = useState<TimeTableSlot[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [activeDay, setActiveDay] = useState<string | null>(null);
-  const baseurl= process.env.NEXT_PUBLIC_BASE_URL;
+  const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
-  /* ---------- Auth ---------- */
   useEffect(() => {
     const storedStudentId = localStorage.getItem('studentId');
     if (!storedStudentId) { router.replace('/login'); return; }
     setStudentId(storedStudentId);
   }, [router]);
 
-  /* ---------- Fetch Timetable ---------- */
   useEffect(() => {
     if (!studentId) return;
     const fetchTimetable = async () => {
@@ -98,7 +94,6 @@ export default function StudentClassesPage() {
 
         setTimeTableSlots(updatedSlots);
 
-        // Auto-select current day
         const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
         const days = [...new Set(updatedSlots.map((s: TimeTableSlot) => s.day))] as string[];
         setActiveDay(days.includes(today) ? today : days[0] ?? null);
@@ -109,7 +104,6 @@ export default function StudentClassesPage() {
     fetchTimetable();
   }, [studentId]);
 
-  /* ---------- Derived Data ---------- */
   const allDays = [...new Set(timeTableSlots.map(s => s.day))].sort(
     (a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)
   );
@@ -117,14 +111,8 @@ export default function StudentClassesPage() {
     ? timeTableSlots.filter(s => s.day === activeDay)
     : timeTableSlots;
 
-  /* ---------- Helpers ---------- */
-  const getTeacherName = (t: string | Teacher) => (typeof t === 'object' ? t.name : '—');
-  const getClassroomName = (c: string | Classroom) =>
-    typeof c === 'object' ? c.classroom_name : '—';
-
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-  /* ------------------ Render ------------------ */
   return (
     <div className="min-h-screen" style={{ background: '#f4f6fb', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -137,7 +125,6 @@ export default function StudentClassesPage() {
             radial-gradient(ellipse 60% 40% at 80% 110%, rgba(168,85,247,0.04) 0%, transparent 60%);
         }
 
-        /* ── Day pill tabs ── */
         .day-pill {
           padding: 6px 18px;
           border-radius: 999px;
@@ -170,7 +157,6 @@ export default function StudentClassesPage() {
         }
         .day-pill.active.today-dot::after { background: #a7f3d0; }
 
-        /* ── Slot card ── */
         .slot-card {
           background: #fff;
           border-radius: 16px;
@@ -186,15 +172,14 @@ export default function StudentClassesPage() {
           box-shadow: 0 20px 60px rgba(15,23,42,.10), 0 4px 16px rgba(15,23,42,.06);
         }
 
-        /* ── Meta chip ── */
         .meta-chip {
           display: inline-flex; align-items: center; gap: 5px;
           font-size: 12px; color: #64748b;
           background: #f8fafc; border: 1px solid #e8ecf4;
           padding: 4px 10px; border-radius: 8px;
+          white-space: nowrap;
         }
 
-        /* ── Shimmer skeleton ── */
         @keyframes shimmer {
           0%   { background-position: -600px 0; }
           100% { background-position:  600px 0; }
@@ -207,53 +192,137 @@ export default function StudentClassesPage() {
           border: 1px solid #e8ecf4;
         }
 
-        /* ── Card entrance ── */
         @keyframes cardIn {
           from { opacity: 0; transform: translateY(18px) scale(0.98); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         .card-enter { animation: cardIn 0.38s cubic-bezier(.22,.68,0,1.1) forwards; opacity: 0; }
 
-        /* ── Stat chip (header strip) ── */
         .stat-chip {
           display: flex; flex-direction: column; align-items: center; gap: 2px;
           padding: 10px 20px; border-right: 1px solid #e8ecf4;
+          flex: 1;
         }
         .stat-chip:last-child { border-right: none; }
 
-        /* ── Time badge ── */
         .time-badge {
           font-family: 'DM Mono', monospace;
-          font-size: 13px; font-weight: 500;
+          font-size: 12px; font-weight: 500;
           color: #fff;
-          padding: 5px 12px;
+          padding: 5px 10px;
           border-radius: 8px;
           display: inline-flex; align-items: center; gap: 5px;
+          white-space: nowrap;
         }
 
-        /* ── Ghost empty ── */
         .empty-ghost {
           display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
           opacity: 0.25; margin-bottom: 32px;
         }
         .ghost-card { height: 130px; background: #dde2ec; border-radius: 12px; }
+
+        /* ── LAYOUT ── */
+        .main-content { transition: margin-left 0.3s; min-height: 100vh; }
+
+        .sticky-header {
+          position: sticky; top: 0; z-index: 20;
+          background: rgba(244,246,251,0.93);
+          backdrop-filter: blur(14px);
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header-title-row {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 24px 32px 16px; flex-wrap: wrap; gap: 12px;
+        }
+
+        .stats-strip {
+          display: flex; background: #fff;
+          border: 1px solid #e8ecf4; border-radius: 12px;
+          overflow: hidden; flex-shrink: 0;
+        }
+
+        .day-pills-row {
+          padding: 0 32px 16px; display: flex; gap: 8px;
+          overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        .day-pills-row::-webkit-scrollbar { display: none; }
+
+        .accent-line {
+          height: 1px; background: linear-gradient(90deg,#e8ecf4,transparent); margin: 0 32px;
+        }
+
+        .content-area { padding: 28px 32px; min-height: calc(100vh - 140px); }
+
+        /* Slot card: desktop = horizontal row */
+        .slot-inner {
+          flex: 1; padding: 16px 20px;
+          display: flex; align-items: center; gap: 20px;
+        }
+        .slot-name-meta { min-width: 0; flex: 1; }
+        .slot-right {
+          display: flex; flex-direction: column; align-items: flex-end;
+          gap: 8px; flex-shrink: 0;
+        }
+
+        /* ── LARGE SCREENS ── */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded  { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+
+        /* ── TABLET ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+          .header-title-row { padding: 20px 20px 14px; }
+          .day-pills-row    { padding: 0 20px 14px; }
+          .accent-line      { margin: 0 20px; }
+          .content-area     { padding: 20px; }
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+
+          .header-title-row {
+            padding: 14px 16px 12px;
+            flex-direction: column; align-items: flex-start;
+          }
+          .header-title-row h1 { font-size: 18px !important; }
+
+          .stats-strip { width: 100%; }
+          .stat-chip   { padding: 8px 8px; }
+
+          .day-pills-row { padding: 0 16px 12px; gap: 6px; }
+          .day-pill      { padding: 5px 12px; font-size: 11px; }
+
+          .accent-line  { margin: 0 16px; }
+          .content-area { padding: 14px 12px; }
+
+          /* Slot card stacks vertically */
+          .slot-inner {
+            flex-direction: column; align-items: flex-start;
+            gap: 10px; padding: 14px 14px;
+          }
+          .slot-top-row {
+            display: flex; align-items: center; gap: 10px; width: 100%;
+          }
+          .slot-right {
+            flex-direction: row; align-items: center;
+            flex-wrap: wrap; gap: 6px; width: 100%;
+          }
+          .time-badge { font-size: 11px; padding: 4px 8px; }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`main-content ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
 
         {/* ══════════ STICKY HEADER ══════════ */}
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 20,
-          background: 'rgba(244,246,251,0.93)',
-          backdropFilter: 'blur(14px)',
-          borderBottom: '1px solid #e2e8f0',
-        }}>
-          {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px 16px' }}>
+        <div className="sticky-header">
+          <div className="header-title-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {/* Icon badge */}
               <div style={{
                 width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                 background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)',
@@ -262,7 +331,6 @@ export default function StudentClassesPage() {
               }}>
                 <CalendarDays style={{ width: 20, height: 20, color: '#fff' }} />
               </div>
-
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <h1 style={{ fontSize: 21, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.4px', margin: 0 }}>
@@ -283,12 +351,8 @@ export default function StudentClassesPage() {
               </div>
             </div>
 
-            {/* Stats strip */}
             {!loading && timeTableSlots.length > 0 && (
-              <div style={{
-                display: 'flex', background: '#fff',
-                border: '1px solid #e8ecf4', borderRadius: 12, overflow: 'hidden',
-              }}>
+              <div className="stats-strip">
                 {[
                   { label: 'Days',    value: allDays.length,        color: '#6366f1' },
                   { label: 'Classes', value: timeTableSlots.length, color: '#16a34a' },
@@ -307,10 +371,8 @@ export default function StudentClassesPage() {
             )}
           </div>
 
-          {/* Day filter pills */}
           {!loading && allDays.length > 0 && (
-            <div style={{ padding: '0 32px 16px', display: 'flex', gap: 8, overflowX: 'auto' }}>
-              {/* All pill */}
+            <div className="day-pills-row">
               <button
                 className={`day-pill${activeDay === null ? ' active' : ''}`}
                 onClick={() => setActiveDay(null)}
@@ -329,14 +391,13 @@ export default function StudentClassesPage() {
             </div>
           )}
 
-          <div style={{ height: 1, background: 'linear-gradient(90deg,#e8ecf4,transparent)', margin: '0 32px' }} />
+          <div className="accent-line" />
           <div style={{ height: 16 }} />
         </div>
 
         {/* ══════════ CONTENT ══════════ */}
-        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 140px)' }}>
+        <div className="page-bg content-area">
 
-          {/* ── Skeletons ── */}
           {loading && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {Array.from({ length: 5 }).map((_, i) => (
@@ -345,27 +406,22 @@ export default function StudentClassesPage() {
             </div>
           )}
 
-          {/* ── Day group view (when "All days") ── */}
+          {/* All days grouped */}
           {!loading && timeTableSlots.length > 0 && activeDay === null && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
               {allDays.map((day, di) => {
                 const daySlots = timeTableSlots.filter(s => s.day === day);
                 return (
                   <div key={day}>
-                    {/* Day section header */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
                       <span style={{
                         fontSize: 12, fontWeight: 700, textTransform: 'uppercase',
-                        letterSpacing: '0.08em', color: '#6366f1',
-                        fontFamily: "'DM Mono', monospace",
-                      }}>
-                        {day}
-                      </span>
+                        letterSpacing: '0.08em', color: '#6366f1', fontFamily: "'DM Mono', monospace",
+                      }}>{day}</span>
                       {day === todayLabel && (
                         <span style={{
                           fontSize: 10, fontWeight: 600, background: '#dcfce7',
-                          color: '#16a34a', padding: '2px 8px', borderRadius: 999,
-                          letterSpacing: '0.04em',
+                          color: '#16a34a', padding: '2px 8px', borderRadius: 999, letterSpacing: '0.04em',
                         }}>TODAY</span>
                       )}
                       <div style={{ flex: 1, height: 1, background: '#e8ecf4' }} />
@@ -373,7 +429,6 @@ export default function StudentClassesPage() {
                         {daySlots.length} {daySlots.length === 1 ? 'class' : 'classes'}
                       </span>
                     </div>
-
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {daySlots.map((slot, i) => (
                         <SlotCard key={slot._id} slot={slot} index={(di * 10) + i} />
@@ -385,7 +440,7 @@ export default function StudentClassesPage() {
             </div>
           )}
 
-          {/* ── Single day view ── */}
+          {/* Single day */}
           {!loading && timeTableSlots.length > 0 && activeDay !== null && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {filteredSlots.length === 0 ? (
@@ -400,7 +455,7 @@ export default function StudentClassesPage() {
             </div>
           )}
 
-          {/* ── Empty state ── */}
+          {/* Empty state */}
           {!loading && timeTableSlots.length === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px', textAlign: 'center' }}>
               <div className="empty-ghost" style={{ width: 280 }}>
@@ -422,7 +477,6 @@ export default function StudentClassesPage() {
               </p>
             </div>
           )}
-
         </div>
       </main>
     </div>
@@ -441,44 +495,49 @@ function SlotCard({ slot, index }: { slot: TimeTableSlot; index: number }) {
         {/* Left accent bar */}
         <div style={{ width: 4, background: color.bar, flexShrink: 0 }} />
 
-        {/* Main content */}
-        <div style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 20 }}>
+        {/* Content area — desktop: row, mobile: column (via CSS) */}
+        <div className="slot-inner">
 
-          {/* Subject icon */}
-          <div style={{
-            width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-            background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <BookOpen style={{ width: 17, height: 17, color: color.mid }} />
-          </div>
+          {/* Icon + name + meta — wrapped in slot-top-row for mobile */}
+          <div className="slot-top-row" style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+            <div style={{
+              width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+              background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <BookOpen style={{ width: 17, height: 17, color: color.mid }} />
+            </div>
 
-          {/* Classroom name + time */}
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 650, color: '#0f172a', marginBottom: 6, letterSpacing: '-0.1px', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {classroomName}
-            </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              <span className="meta-chip">
-                <User style={{ width: 11, height: 11, color: color.mid }} />
-                {teacherName}
-              </span>
-              {slot.date && (
+            <div className="slot-name-meta" style={{ minWidth: 0, flex: 1 }}>
+              <h3 style={{
+                fontSize: 14, fontWeight: 650, color: '#0f172a',
+                marginBottom: 6, letterSpacing: '-0.1px', lineHeight: 1.3,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {classroomName}
+              </h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 <span className="meta-chip">
-                  <CalendarDays style={{ width: 11, height: 11 }} />
-                  {slot.date}
+                  <User style={{ width: 11, height: 11, color: color.mid }} />
+                  {teacherName}
                 </span>
-              )}
-              {slot.roomno && (
-                <span className="meta-chip">
-                  <School style={{ width: 11, height: 11 }} />
-                  Room {slot.roomno}
-                </span>
-              )}
+                {slot.date && (
+                  <span className="meta-chip">
+                    <CalendarDays style={{ width: 11, height: 11 }} />
+                    {slot.date}
+                  </span>
+                )}
+                {slot.roomno && (
+                  <span className="meta-chip">
+                    <School style={{ width: 11, height: 11 }} />
+                    Room {slot.roomno}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Time badge + day pill */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+          <div className="slot-right">
             <span className="time-badge" style={{ background: color.bar }}>
               <Clock style={{ width: 11, height: 11 }} />
               {slot.start_time} – {slot.end_time}
@@ -494,7 +553,7 @@ function SlotCard({ slot, index }: { slot: TimeTableSlot; index: number }) {
           </div>
         </div>
 
-        {/* Right progress accent strip */}
+        {/* Right accent strip */}
         <div style={{
           width: 3, background: color.bar, opacity: 0.3, flexShrink: 0,
           borderRadius: '0 16px 16px 0',
