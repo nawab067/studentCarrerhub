@@ -302,11 +302,178 @@ export default function StudentDashboardPage() {
           animation: pulse-dot 2s ease-in-out infinite;
           display: inline-block;
         }
+
+        /* ── MAIN LAYOUT ── */
+        .main-content {
+          transition: margin-left 0.3s;
+          min-height: 100vh;
+        }
+
+        /* ── LARGE SCREENS: sidebar offset ── */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+
+        /* ── Sticky header layout ── */
+        .sticky-header-inner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px 32px;
+        }
+
+        /* ── Content padding ── */
+        .content-padding {
+          padding: 28px 32px;
+          min-height: calc(100vh - 84px);
+        }
+
+        /* ── Stats grid ── */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 14px;
+          margin-bottom: 28px;
+        }
+
+        /* ── Two-column layout ── */
+        .two-col-layout {
+          display: grid;
+          grid-template-columns: 1fr 340px;
+          gap: 20px;
+          align-items: start;
+        }
+
+        /* ── Nav cards grid ── */
+        .nav-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px;
+        }
+
+        /* ── Hero banner buttons ── */
+        .hero-buttons {
+          display: flex;
+          gap: 10px;
+          margin-top: 22px;
+          flex-wrap: wrap;
+        }
+
+        /* ── Header right side ── */
+        .header-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        /* ── TABLET (641–1024px) ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+
+          .sticky-header-inner {
+            padding: 16px 20px;
+          }
+
+          .content-padding {
+            padding: 20px;
+          }
+
+          .two-col-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .hero-banner {
+            padding: 24px 24px;
+          }
+        }
+
+        /* ── MOBILE (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+
+          .sticky-header-inner {
+            padding: 12px 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+
+          .sticky-header-inner h1 {
+            font-size: 17px !important;
+          }
+
+          /* Hide clock & bell on very small screens, keep bell only */
+          .header-clock {
+            display: none !important;
+          }
+
+          .header-right {
+            gap: 8px;
+          }
+
+          .content-padding {
+            padding: 14px 12px;
+          }
+
+          .hero-banner {
+            padding: 22px 18px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+          }
+
+          /* Hide the large graduation cap icon on mobile */
+          .hero-icon-wrapper {
+            display: none !important;
+          }
+
+          .hero-banner h2 {
+            font-size: 20px !important;
+          }
+
+          .hero-buttons {
+            margin-top: 16px;
+            gap: 8px;
+          }
+
+          .hero-buttons button {
+            font-size: 12px !important;
+            padding: 8px 14px !important;
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+          }
+
+          .stat-card {
+            padding: 14px 14px;
+            gap: 10px;
+          }
+
+          .two-col-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .nav-cards-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .section-header {
+            margin-bottom: 10px;
+          }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`main-content ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
 
         {/* ══════════ STICKY HEADER ══════════ */}
         <div style={{
@@ -315,7 +482,7 @@ export default function StudentDashboardPage() {
           backdropFilter: 'blur(14px)',
           borderBottom: '1px solid #e2e8f0',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 32px' }}>
+          <div className="sticky-header-inner">
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12, flexShrink: 0,
@@ -337,8 +504,8 @@ export default function StudentDashboardPage() {
             </div>
 
             {/* Right side: clock + notification bell */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
+            <div className="header-right">
+              <div className="header-clock" style={{
                 background: '#fff', border: '1px solid #e8ecf4', borderRadius: 10,
                 padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 7,
               }}>
@@ -371,7 +538,7 @@ export default function StudentDashboardPage() {
         </div>
 
         {/* ══════════ CONTENT ══════════ */}
-        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 84px)' }}>
+        <div className="page-bg content-padding">
 
           {/* ── Hero Banner ── */}
           <div className="hero-banner card-enter" style={{ animationDelay: '0ms', marginBottom: 28 }}>
@@ -400,7 +567,7 @@ export default function StudentDashboardPage() {
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, maxWidth: 340, lineHeight: 1.6 }}>
                 Here's what's happening in your academic world today. Stay on top of your assignments and attendance.
               </p>
-              <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
+              <div className="hero-buttons">
                 <button
                   onClick={() => router.push(`/studentPortal/Assignments/${studentId}`)}
                   style={{
@@ -434,8 +601,8 @@ export default function StudentDashboardPage() {
               </div>
             </div>
 
-            {/* Right side large icon */}
-            <div style={{ position: 'relative', zIndex: 1, flexShrink: 0, display: 'flex', alignItems: 'center', paddingRight: 16 }}>
+            {/* Right side large icon — hidden on mobile via CSS class */}
+            <div className="hero-icon-wrapper" style={{ position: 'relative', zIndex: 1, flexShrink: 0, display: 'flex', alignItems: 'center', paddingRight: 16 }}>
               <div style={{
                 width: 90, height: 90, borderRadius: 24,
                 background: 'rgba(255,255,255,0.12)',
@@ -449,7 +616,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* ── Quick Stats Row ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 14, marginBottom: 28 }}>
+          <div className="stats-grid">
             {quickStats.map((stat, i) => {
               const Icon = stat.icon;
               return (
@@ -482,7 +649,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* ── Two-column: Nav Cards + Activity ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20, alignItems: 'start' }}>
+          <div className="two-col-layout">
 
             {/* Left: Navigation Cards */}
             <div>
@@ -492,7 +659,7 @@ export default function StudentDashboardPage() {
                 </span>
                 <span style={{ fontSize: 11, color: '#94a3b8' }}>{navCards.length} sections</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
+              <div className="nav-cards-grid">
                 {navCards.map((card, i) => {
                   const color = subjectColors[card.colorIndex];
                   const Icon = card.icon;
