@@ -3,10 +3,17 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import TeacherPortalSidebar from "@/components/teacher-portal/teacherportal-sidebar";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BookOpen, Users, Calendar, ArrowRight, GraduationCap, Clock } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  Calendar,
+  ArrowUpRight,
+  GraduationCap,
+  Clock,
+  AlertCircle,
+  Search,
+  Layers,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export interface AssignedClass {
@@ -16,55 +23,49 @@ export interface AssignedClass {
   teacherId: string;
 }
 
-export default function TeacherClassesPage() {
+const CLASS_COLORS = [
+  { light: '#eef2ff', mid: '#6366f1', bar: 'linear-gradient(135deg,#4f46e5,#6366f1)' },
+  { light: '#f5f3ff', mid: '#8b5cf6', bar: 'linear-gradient(135deg,#7c3aed,#8b5cf6)' },
+  { light: '#fdf4ff', mid: '#c084fc', bar: 'linear-gradient(135deg,#a855f7,#c084fc)' },
+  { light: '#ede9fe', mid: '#7c3aed', bar: 'linear-gradient(135deg,#6d28d9,#7c3aed)' },
+  { light: '#f0f9ff', mid: '#818cf8', bar: 'linear-gradient(135deg,#6366f1,#818cf8)' },
+  { light: '#faf5ff', mid: '#a78bfa', bar: 'linear-gradient(135deg,#8b5cf6,#a78bfa)' },
+]
+
+type FilterType = 'all' | 'small' | 'medium' | 'large'
+
+export default function TeacherAttendancePage() {
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [assignedClasses, setAssignedClasses] = useState<AssignedClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [search, setSearch] = useState('');
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const router = useRouter();
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-  // ✅ 1️⃣ READ teacherId from localStorage
   useEffect(() => {
     const id = localStorage.getItem("teacherId");
-    console.log("Teacher ID from localStorage:", id);
-
-    if (!id) {
-      setError("Teacher ID not found. Please login again.");
-      setLoading(false);
-      return;
-    }
-
+    if (!id) { setError("Teacher ID not found. Please login again."); setLoading(false); return; }
     setTeacherId(id);
   }, []);
 
-  // ✅ 2️⃣ FETCH classes once teacherId exists
   useEffect(() => {
     if (!teacherId) return;
-
     const fetchClasses = async () => {
       try {
         setLoading(true);
-
-        console.log(teacherId);
-
-        const response = await axios.get(
-          `${baseUrl}/classes/assigned/${teacherId}`
-        );
-
-        console.log("FULL API RESPONSE:", response.data);
-
+        const response = await axios.get(`${baseUrl}/classes/assigned/${teacherId}`);
         setAssignedClasses(response.data.data || []);
-      } catch (err) {
-        console.error("API ERROR:", err);
+      } catch {
         setError("Failed to load classes.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchClasses();
   }, [teacherId]);
 
@@ -72,205 +73,349 @@ export default function TeacherClassesPage() {
     router.push(`/teacherportal/attendence/AttendenceSheet/${cls._id}`);
   };
 
-  const getClassColor = (index: number) => {
-    const colors = [
-      "from-blue-500 to-blue-600",
-      "from-purple-500 to-purple-600",
-      "from-emerald-500 to-emerald-600",
-      "from-orange-500 to-orange-600",
-      "from-pink-500 to-pink-600",
-      "from-cyan-500 to-cyan-600",
-    ];
-    return colors[index % colors.length];
+  const getClassSize = (count: number): FilterType =>
+    count <= 15 ? 'small' : count <= 30 ? 'medium' : 'large'
+
+  const totalStudents = assignedClasses.reduce((s, c) => s + c.students.length, 0);
+
+  const counts = {
+    all:    assignedClasses.length,
+    small:  assignedClasses.filter(c => getClassSize(c.students.length) === 'small').length,
+    medium: assignedClasses.filter(c => getClassSize(c.students.length) === 'medium').length,
+    large:  assignedClasses.filter(c => getClassSize(c.students.length) === 'large').length,
   };
 
+  const filtered = assignedClasses.filter(cls => {
+    const matchFilter = filter === 'all' || getClassSize(cls.students.length) === filter;
+    const matchSearch = cls.classroom_name.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen" style={{ background: '#f4f6fb', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
+
+        .page-bg {
+          background: #f4f6fb;
+          background-image:
+            radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99,102,241,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 110%, rgba(139,92,246,0.05) 0%, transparent 60%);
+        }
+        .cls-card {
+          background: #fff; border-radius: 16px; border: 1px solid #e8ecf4;
+          cursor: pointer; overflow: hidden; display: flex; flex-direction: column;
+          transition: transform 0.22s cubic-bezier(.22,.68,0,1.15), box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+        .cls-card:hover {
+          transform: translateY(-4px); border-color: transparent;
+          box-shadow: 0 20px 60px rgba(15,23,42,.10), 0 4px 16px rgba(15,23,42,.06);
+        }
+        .card-arrow { opacity: 0; transform: translate(-4px,4px); transition: opacity 0.2s ease, transform 0.2s ease; }
+        .cls-card:hover .card-arrow { opacity: 1; transform: translate(0,0); }
+
+        .filter-pill {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
+          cursor: pointer; border: 1px solid transparent; transition: all 0.16s ease;
+          background: transparent; white-space: nowrap; font-family: 'DM Sans', sans-serif;
+        }
+        .filter-pill:hover { background: #eef0f8; }
+        .filter-pill.active { background: #1e293b; color: #fff !important; }
+        .pill-count { font-size: 11px; font-family: 'DM Mono', monospace; padding: 1px 6px; border-radius: 999px; min-width: 20px; text-align: center; }
+        .filter-pill.active .pill-count { background: rgba(255,255,255,.2); }
+        .filter-pill:not(.active) .pill-count { background: #e8ecf4; color: #64748b; }
+
+        .search-wrap { position: relative; flex: 1; max-width: 300px; }
+        .search-input {
+          width: 100%; padding: 9px 14px 9px 38px; border-radius: 10px; border: 1px solid #e2e8f0;
+          background: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif; color: #1e293b; outline: none;
+          transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+        .search-input::placeholder { color: #94a3b8; }
+        .search-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.10); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+        @keyframes shimmer { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
+        .skel {
+          background: linear-gradient(90deg,#eef0f6 25%,#e4e8f2 50%,#eef0f6 75%);
+          background-size: 600px 100%; animation: shimmer 1.4s infinite;
+          border-radius: 16px; border: 1px solid #e8ecf4;
+        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .card-enter { animation: cardIn 0.38s cubic-bezier(.22,.68,0,1.1) forwards; opacity: 0; }
+
+        .stat-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 20px; border-right: 1px solid #e8ecf4; }
+        .stat-chip:last-child { border-right: none; }
+        .stats-strip { display: flex; background: #fff; border: 1px solid #e8ecf4; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+
+        .subject-bar { width: 4px; border-radius: 0 4px 4px 0; flex-shrink: 0; align-self: stretch; }
+
+        .attend-btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+          width: 100%; padding: 11px 16px; border-radius: 10px;
+          background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff;
+          font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          box-shadow: 0 4px 14px rgba(79,70,229,.22);
+          transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        }
+        .attend-btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,.30); }
+
+        .clear-btn {
+          margin-top: 16px; padding: 8px 20px; border-radius: 8px; background: #1e293b; color: #fff;
+          font-size: 13px; font-weight: 500; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+          transition: background 0.16s ease;
+        }
+        .clear-btn:hover { background: #0f172a; }
+
+        .empty-ghost { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; opacity: 0.22; margin-bottom: 32px; }
+        .ghost-card { height: 130px; background: #dde2ec; border-radius: 12px; }
+
+        .main-content { transition: margin-left 0.3s; }
+        .header-title-row { display: flex; align-items: center; justify-content: space-between; padding: 24px 32px 16px; flex-wrap: wrap; gap: 12px; }
+        .header-filter-row { display: flex; align-items: center; gap: 10px; padding: 0 32px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .header-filter-row::-webkit-scrollbar { display: none; }
+        .cards-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        .content-padding { padding: 28px 32px; }
+
+        @media (max-width: 640px) {
+          .main-content { margin-left: 0 !important; }
+          .header-title-row { padding: 16px 16px 12px; flex-direction: column; align-items: flex-start; }
+          .header-filter-row { padding: 0 16px 12px; gap: 6px; }
+          .filter-pill { padding: 5px 10px; font-size: 12px; }
+          .stats-strip { width: 100%; }
+          .stat-chip { flex: 1; padding: 8px 10px; }
+          .search-wrap { max-width: 100%; width: 100%; }
+          .cards-grid { grid-template-columns: 1fr; }
+          .content-padding { padding: 16px 12px; }
+          .header-title-row h1 { font-size: 18px !important; }
+        }
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content { margin-left: 0 !important; }
+          .header-title-row { padding: 20px 20px 14px; }
+          .header-filter-row { padding: 0 20px 14px; }
+          .cards-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+          .content-padding { padding: 20px; }
+          .search-wrap { max-width: 240px; }
+        }
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded { margin-left: 256px; }
+          .main-content.sidebar-collapsed { margin-left: 80px; }
+        }
+      `}</style>
+
       <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-         <main
-  className={`transition-all duration-300 min-h-screen ${
-    collapsed ? "ml-16" : "ml-64"
-  }`}
->
+      <main className={`main-content min-h-screen ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}>
 
-      
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-              <GraduationCap className="h-6 w-6 text-white" />
+        {/* ══════════ STICKY HEADER ══════════ */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(244,246,251,0.93)', backdropFilter: 'blur(14px)', borderBottom: '1px solid #e2e8f0' }}>
+
+          {/* Title row */}
+          <div className="header-title-row">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 20px rgba(99,102,241,.28)' }}>
+                <GraduationCap style={{ width: 20, height: 20, color: '#fff' }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h1 style={{ fontSize: 21, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.4px', margin: 0 }}>
+                    Attendance
+                  </h1>
+                  {!loading && (
+                    <span style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", fontWeight: 500, background: '#1e293b', color: '#fff', padding: '2px 10px', borderRadius: 999 }}>
+                      {assignedClasses.length} total
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 13, color: '#94a3b8', margin: '3px 0 0' }}>
+                  Manage and monitor attendance across your classes
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Attendance
-              </h1>
-              <p className="text-slate-600">Manage and monitor your assigned classes</p>
+
+            {/* Stats strip */}
+            {!loading && assignedClasses.length > 0 && (
+              <div className="stats-strip">
+                {([
+                  { label: 'Classes',     value: assignedClasses.length, color: '#4f46e5' },
+                  { label: 'Students',    value: totalStudents,           color: '#7c3aed' },
+                  { label: 'Avg / Class', value: assignedClasses.length ? Math.round(totalStudents / assignedClasses.length) : 0, color: '#8b5cf6' },
+                ] as const).map(s => (
+                  <div key={s.label} className="stat-chip">
+                    <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }}>{s.value}</span>
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Filter + Search row */}
+          <div className="header-filter-row">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+              {([
+                { key: 'all'    as FilterType, label: 'All Classes',   count: counts.all },
+                { key: 'small'  as FilterType, label: '≤ 15 Students', count: counts.small },
+                { key: 'medium' as FilterType, label: '16 – 30',        count: counts.medium },
+                { key: 'large'  as FilterType, label: '30 +',           count: counts.large },
+              ]).map(f => (
+                <button key={f.key} className={`filter-pill${filter === f.key ? ' active' : ''}`} style={{ color: filter === f.key ? '#fff' : '#475569' }} onClick={() => setFilter(f.key)}>
+                  {f.label}
+                  <span className="pill-count">{f.count}</span>
+                </button>
+              ))}
+            </div>
+            <div className="search-wrap">
+              <Search className="search-icon" style={{ width: 15, height: 15, color: '#94a3b8' }} />
+              <input className="search-input" placeholder="Search classes..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
 
-        {/* Stats Overview */}
-        {!loading && !error && assignedClasses.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="bg-white border-0 shadow-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Total Classes</p>
-                    <p className="text-3xl font-bold text-slate-800">{assignedClasses.length}</p>
-                  </div>
-                  <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center">
-                    <BookOpen className="h-7 w-7 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* ══════════ CONTENT ══════════ */}
+        <div className="page-bg content-padding" style={{ minHeight: 'calc(100vh - 160px)' }}>
 
-            <Card className="bg-white border-0 shadow-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Total Students</p>
-                    <p className="text-3xl font-bold text-slate-800">
-                      {assignedClasses.reduce((sum, cls) => sum + cls.students.length, 0)}
-                    </p>
-                  </div>
-                  <div className="h-14 w-14 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <Users className="h-7 w-7 text-emerald-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white border-0 shadow-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Avg. Class Size</p>
-                    <p className="text-3xl font-bold text-slate-800">
-                      {Math.round(
-                        assignedClasses.reduce((sum, cls) => sum + cls.students.length, 0) /
-                          assignedClasses.length
-                      )}
-                    </p>
-                  </div>
-                  <div className="h-14 w-14 rounded-full bg-violet-100 flex items-center justify-center">
-                    <GraduationCap className="h-7 w-7 text-violet-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="relative">
-              <div className="h-16 w-16 border-4 border-blue-200 rounded-full"></div>
-              <div className="h-16 w-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin absolute top-0"></div>
+          {/* Error */}
+          {error && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: '14px 18px', marginBottom: 20 }}>
+              <AlertCircle style={{ width: 18, height: 18, color: '#ef4444', flexShrink: 0 }} />
+              <p style={{ fontSize: 13, color: '#dc2626', fontWeight: 500 }}>{error}</p>
             </div>
-            <p className="mt-4 text-slate-600 font-medium">Loading your classes...</p>
-          </div>
-        )}
+          )}
 
-        {/* Error State */}
-        {error && (
-          <Card className="bg-red-50 border-red-200 border-2">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <span className="text-red-600 text-xl">!</span>
-                </div>
-                <p className="text-red-700 font-medium">{error}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {/* Skeletons */}
+          {loading && (
+            <div className="cards-grid">
+              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skel" style={{ height: 240 }} />)}
+            </div>
+          )}
 
-        {/* Empty State */}
-        {!loading && !error && assignedClasses.length === 0 && (
-          <Card className="bg-white border-0 shadow-lg">
-            <CardContent className="py-20">
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                  <BookOpen className="h-10 w-10 text-slate-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-slate-700 mb-2">No Classes Yet</h3>
-                <p className="text-slate-500 max-w-md">
-                  You don't have any classes assigned at the moment. Check back later or contact your administrator.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {/* Cards */}
+          {!loading && filtered.length > 0 && (
+            <div className="cards-grid">
+              {filtered.map((cls, i) => {
+                const color = CLASS_COLORS[i % CLASS_COLORS.length];
+                const sizeLabel = getClassSize(cls.students.length) === 'large' ? 'Large class' : getClassSize(cls.students.length) === 'medium' ? 'Medium class' : 'Small class';
+                const barWidth  = getClassSize(cls.students.length) === 'large' ? '90%' : getClassSize(cls.students.length) === 'medium' ? '55%' : '25%';
 
-        {/* Classes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {assignedClasses.map((cls, index) => (
-            <Card
-              key={cls._id}
-              className="group bg-white border-0 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1"
-            >
-              {/* Gradient Header */}
-              <div className={`h-2 bg-gradient-to-r ${getClassColor(index)}`}></div>
+                return (
+                  <div key={cls._id} className="card-enter" style={{ animationDelay: `${i * 45}ms` }}>
+                    <div className="cls-card" onMouseEnter={() => setHoveredId(cls._id)} onMouseLeave={() => setHoveredId(null)}>
+                      <div style={{ display: 'flex', flex: 1 }}>
+                        {/* Left accent bar */}
+                        <div className="subject-bar" style={{ background: color.bar }} />
 
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
-                      {cls.classroom_name}
-                    </CardTitle>
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200">
-                      <BookOpen className="h-3 w-3 mr-1" />
-                      Active Class
-                    </Badge>
-                  </div>
-                  <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${getClassColor(index)} flex items-center justify-center shadow-md`}>
-                    <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardHeader>
+                        <div style={{ flex: 1, padding: '18px 18px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-              <CardContent className="space-y-4">
-                {/* Student Count */}
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-blue-600" />
+                          {/* Top: icon + badge + arrow */}
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <BookOpen style={{ width: 16, height: 16, color: color.mid }} />
+                              </div>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px 3px 7px', borderRadius: 999, fontSize: 11, fontWeight: 600, fontFamily: "'DM Mono',monospace", background: color.light, color: color.mid }}>
+                                <GraduationCap style={{ width: 10, height: 10 }} />
+                                Active
+                              </span>
+                            </div>
+                            <div className="card-arrow">
+                              <ArrowUpRight style={{ width: 16, height: 16, color: '#94a3b8' }} />
+                            </div>
+                          </div>
+
+                          {/* Class name */}
+                          <div>
+                            <h3 style={{ fontSize: 14, fontWeight: 650, color: '#0f172a', lineHeight: 1.35, marginBottom: 4, letterSpacing: '-0.1px' }}>
+                              {cls.classroom_name}
+                            </h3>
+                            <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>
+                              Click to record or view attendance
+                            </p>
+                          </div>
+
+                          <div style={{ height: 1, background: '#f1f5f9' }} />
+
+                          {/* Meta rows */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                              <div style={{ width: 22, height: 22, borderRadius: 6, flexShrink: 0, background: color.light, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Users style={{ width: 11, height: 11, color: color.mid }} />
+                              </div>
+                              <span style={{ fontSize: 12, color: '#475569', fontWeight: 500 }}>
+                                {cls.students.length} student{cls.students.length !== 1 ? 's' : ''} enrolled
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                              <div style={{ width: 22, height: 22, borderRadius: 6, flexShrink: 0, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Clock style={{ width: 11, height: 11, color: '#94a3b8' }} />
+                              </div>
+                              <span style={{ fontSize: 12, color: '#475569', fontWeight: 500 }}>
+                                Updated today
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* CTA button */}
+                          <button className="attend-btn" onClick={() => handleViewAttendance(cls)}>
+                            <Calendar style={{ width: 14, height: 14 }} />
+                            View Attendance
+                            <ArrowUpRight style={{ width: 13, height: 13, marginLeft: 'auto' }} />
+                          </button>
+
+                          {/* Footer */}
+                          <div style={{ paddingTop: 2, borderTop: '1px dashed #e8ecf4', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Layers style={{ width: 12, height: 12, color: color.mid }} />
+                              <span style={{ fontSize: 11, fontFamily: "'DM Mono',monospace", color: color.mid, fontWeight: 500 }}>{sizeLabel}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
+                              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>Active</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Progress strip */}
+                      <div style={{ height: 3, background: '#f1f5f9', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', inset: 0, background: color.bar, opacity: 0.55, width: barWidth }} />
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-slate-600">Total Students</p>
-                      <p className="text-xl font-bold text-slate-800">{cls.students.length}</p>
-                    </div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+          )}
 
-                {/* Action Button */}
-                <Button
-                  onClick={() => handleViewAttendance(cls)}
-                  className={`w-full bg-gradient-to-r ${getClassColor(index)} hover:opacity-90 text-white font-medium py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 group/btn`}
-                >
-                  <Calendar className="h-5 w-5 mr-2" />
-                  View Attendance
-                  <ArrowRight className="h-5 w-5 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
+          {/* No search results */}
+          {!loading && assignedClasses.length > 0 && filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <Search style={{ width: 24, height: 24, color: '#94a3b8' }} />
+              </div>
+              <p style={{ fontSize: 15, fontWeight: 600, color: '#1e293b', marginBottom: 6 }}>No matching classes</p>
+              <p style={{ fontSize: 13, color: '#94a3b8' }}>Try adjusting your search or filter</p>
+              <button className="clear-btn" onClick={() => { setFilter('all'); setSearch(''); }}>Clear filters</button>
+            </div>
+          )}
 
-                {/* Additional Info */}
-                <div className="flex items-center justify-between text-sm text-slate-500 pt-2">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>Updated today</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                    <span>Active</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Empty state */}
+          {!loading && !error && assignedClasses.length === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px', textAlign: 'center' }}>
+              <div className="empty-ghost" style={{ width: 280 }}>
+                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="ghost-card" />)}
+              </div>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(99,102,241,.25)' }}>
+                <BookOpen style={{ width: 24, height: 24, color: '#fff' }} />
+              </div>
+              <p style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.2px' }}>No classes assigned</p>
+              <p style={{ fontSize: 13, color: '#94a3b8', maxWidth: 280, lineHeight: 1.6 }}>
+                You haven't been assigned to any class yet. Contact your administrator.
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

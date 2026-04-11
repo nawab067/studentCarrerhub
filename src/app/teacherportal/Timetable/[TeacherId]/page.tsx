@@ -58,17 +58,18 @@ function StatChip({ icon, label, value, accent }: {
 }) {
   return (
     <div className={cn(
-      "flex items-center gap-3 rounded-xl border px-4 py-3 bg-white dark:bg-gray-900 shadow-sm",
+      "flex items-center gap-2.5 sm:gap-3 rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 bg-white dark:bg-gray-900 shadow-sm",
       accent
     )}>
       <div className="shrink-0">{icon}</div>
       <div className="min-w-0">
-        <p className="text-xs font-medium text-muted-foreground truncate">{label}</p>
-        <p className="text-xl font-bold leading-tight tabular-nums">{value}</p>
+        <p className="text-[10px] sm:text-xs font-medium text-muted-foreground truncate">{label}</p>
+        <p className="text-lg sm:text-xl font-bold leading-tight tabular-nums">{value}</p>
       </div>
     </div>
   );
 }
+
 const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
 function ClassroomName({ id }: { id: string }) {
@@ -91,7 +92,8 @@ function SlotCard({ slot, periodNumber, onClick }: {
       onClick={onClick}
       className={cn(
         "group relative rounded-xl border p-3 cursor-pointer transition-all duration-200",
-        "hover:shadow-md hover:-translate-y-0.5",
+        // On mobile: active state instead of hover for better touch UX
+        "hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] active:shadow-sm",
         cfg.bg, cfg.border
       )}
     >
@@ -142,21 +144,21 @@ function SlotCard({ slot, periodNumber, onClick }: {
 function SlotRow({ slot, periodNumber }: { slot: SlotData; periodNumber: number }) {
   const cfg = DAY_CONFIG[slot.day] ?? DAY_CONFIG["Monday"];
   return (
-    <div className="flex flex-wrap items-center gap-3 py-3 px-4 rounded-xl hover:bg-muted/40 transition-colors">
-      <Badge variant="secondary" className={cn("shrink-0 font-semibold text-xs px-2.5", cfg.badge)}>
+    <div className="flex flex-wrap items-center gap-2 sm:gap-3 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:bg-muted/40 active:bg-muted/60 transition-colors">
+      <Badge variant="secondary" className={cn("shrink-0 font-semibold text-xs px-2 sm:px-2.5", cfg.badge)}>
         {slot.day}
       </Badge>
-      <Badge variant="outline" className="text-xs shrink-0">Period {periodNumber}</Badge>
-      <div className="flex items-center gap-1.5 min-w-[130px]">
-        <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium tabular-nums">{slot.start_time} – {slot.end_time}</span>
+      <Badge variant="outline" className="text-xs shrink-0">P{periodNumber}</Badge>
+      <div className="flex items-center gap-1 sm:gap-1.5 min-w-[110px] sm:min-w-[130px]">
+        <Clock className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground shrink-0" />
+        <span className="text-xs sm:text-sm font-medium tabular-nums">{slot.start_time} – {slot.end_time}</span>
       </div>
-      <div className="flex items-center gap-1.5 min-w-[140px]">
-        <DoorOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium truncate"><ClassroomName id={slot.classroom_id} /></span>
+      <div className="flex items-center gap-1 sm:gap-1.5 min-w-[120px] sm:min-w-[140px]">
+        <DoorOpen className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground shrink-0" />
+        <span className="text-xs sm:text-sm font-medium truncate"><ClassroomName id={slot.classroom_id} /></span>
       </div>
       {slot.roomno && (
-        <Badge variant="outline" className="text-xs shrink-0">Room {slot.roomno}</Badge>
+        <Badge variant="outline" className="text-xs shrink-0">Rm {slot.roomno}</Badge>
       )}
       {slot.date && (
         <span className="text-xs text-muted-foreground shrink-0">{slot.date}</span>
@@ -176,7 +178,7 @@ export default function TimetablePage() {
   const [activeDay, setActiveDay]       = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<SlotData | null>(null);
   const [sheetOpen, setSheetOpen]       = useState(false);
-  const [collapsed, setCollapsed]       = useState(false);  
+  const [collapsed, setCollapsed]       = useState(false);
 
   const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -206,44 +208,49 @@ export default function TimetablePage() {
 
   return (
     /*
-     * LAYOUT STRATEGY
-     * ───────────────
-     * TeacherPortalSidebar is position:fixed (w-[290px]).
-     * So the page body MUST have matching left padding/margin to not slide under it.
+     * RESPONSIVE LAYOUT STRATEGY
+     * ──────────────────────────
+     * Mobile  (<768px):  sidebar hidden/overlay, no left margin, full-width content
+     * Tablet  (768-1024px): sidebar collapsed (icon-only, w-16), ml-16
+     * Desktop (>1024px): sidebar expanded/collapsed based on state
      *
-     * On mobile the sidebar collapses, so we use:
-     *   pl-0 md:pl-[290px]          ← pushes content right on desktop
-     *   min-h-screen overflow-x-hidden  ← prevents any horizontal bleed
+     * The sidebar is position:fixed, so we use margin-left on main to offset.
+     * On mobile we use ml-0 since the sidebar either overlays or is hidden.
      */
     <div className="min-h-screen bg-[#f8f8fc] dark:bg-[#0d0d12]">
       {/* Sidebar — renders fixed internally */}
       <TeacherPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-      
-               <main
-        className={`transition-all duration-300 min-h-screen ${
-          collapsed ? "ml-16" : "ml-64"
-        }`}
+
+      <main
+        className={cn(
+          "transition-all duration-300 min-h-screen",
+          // Mobile: no offset (sidebar overlays)
+          // md+: offset by sidebar width
+          collapsed
+            ? "ml-0 md:ml-16"
+            : "ml-0 md:ml-64"
+        )}
       >
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-5 md:space-y-7">
 
           {/* ── Header ── */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-indigo-900">
-                  <GraduationCap className="h-5 w-5 text-white" />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1 sm:space-y-1.5">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-indigo-900">
+                  <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                   Weekly Timetable
                 </h1>
               </div>
-              <p className="text-sm text-muted-foreground pl-[2.75rem]">
+              <p className="text-xs sm:text-sm text-muted-foreground pl-9 sm:pl-[2.75rem]">
                 Your complete teaching schedule for the week
               </p>
             </div>
 
             {/* View toggle */}
-            <div className="flex items-center gap-2 self-end sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto">
               <TooltipProvider delayDuration={200}>
                 <div className="flex items-center rounded-lg border bg-white dark:bg-gray-900 p-1 shadow-sm gap-0.5">
                   <Tooltip>
@@ -284,21 +291,22 @@ export default function TimetablePage() {
           </div>
 
           {/* ── Stats ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {/* Mobile: 3-col compact, sm+: 3-col normal */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <StatChip
-              icon={<CalendarDays className="h-5 w-5 text-indigo-500" />}
+              icon={<CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />}
               label="Total Periods"
               value={timeslots.length}
               accent="border-indigo-100 dark:border-indigo-900/50"
             />
             <StatChip
-              icon={<DoorOpen className="h-5 w-5 text-violet-500" />}
+              icon={<DoorOpen className="h-4 w-4 sm:h-5 sm:w-5 text-violet-500" />}
               label="Classrooms"
               value={new Set(timeslots.map((s) => s.classroom_id)).size}
               accent="border-violet-100 dark:border-violet-900/50"
             />
             <StatChip
-              icon={<CalendarDays className="h-5 w-5 text-amber-500" />}
+              icon={<CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />}
               label="Active Days"
               value={activeDays.length}
               accent="border-amber-100 dark:border-amber-900/50"
@@ -307,11 +315,12 @@ export default function TimetablePage() {
 
           {/* ── Day filter pills ── */}
           {!loading && timeslots.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
+            // Scrollable horizontally on mobile so pills never wrap awkwardly
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-3 sm:mx-0 px-3 sm:px-0 scrollbar-none flex-nowrap sm:flex-wrap">
               <button
                 onClick={() => setActiveDay(null)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150",
+                  "whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 shrink-0",
                   activeDay === null
                     ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                     : "bg-white dark:bg-gray-900 text-muted-foreground border-gray-200 dark:border-gray-700 hover:border-indigo-400 hover:text-indigo-600"
@@ -328,7 +337,7 @@ export default function TimetablePage() {
                     key={d}
                     onClick={() => setActiveDay(activeDay === d ? null : d)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150",
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 shrink-0 whitespace-nowrap",
                       activeDay === d
                         ? cn(cfg.badge, "border-current shadow-sm scale-105")
                         : cn(
@@ -348,10 +357,10 @@ export default function TimetablePage() {
 
           {/* ── Loading ── */}
           {loading && (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4">
               <div className="relative">
-                <div className="h-16 w-16 rounded-full border-4 border-indigo-100 dark:border-indigo-900" />
-                <Loader2 className="h-16 w-16 animate-spin text-indigo-600 absolute inset-0" />
+                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full border-4 border-indigo-100 dark:border-indigo-900" />
+                <Loader2 className="h-14 w-14 sm:h-16 sm:w-16 animate-spin text-indigo-600 absolute inset-0" />
               </div>
               <p className="text-sm text-muted-foreground animate-pulse">Loading schedule…</p>
             </div>
@@ -367,13 +376,13 @@ export default function TimetablePage() {
 
           {/* ── Empty ── */}
           {!loading && !error && timeslots.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 gap-5">
-              <div className="p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50">
-                <CalendarDays className="h-12 w-12 text-indigo-400" />
+            <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4 sm:gap-5">
+              <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50">
+                <CalendarDays className="h-10 w-10 sm:h-12 sm:w-12 text-indigo-400" />
               </div>
               <div className="text-center space-y-1">
-                <h3 className="text-lg font-semibold">No schedule yet</h3>
-                <p className="text-sm text-muted-foreground max-w-xs">
+                <h3 className="text-base sm:text-lg font-semibold">No schedule yet</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-xs">
                   You don't have any scheduled classes yet. Contact the administrator
                   if this seems incorrect.
                 </p>
@@ -384,8 +393,14 @@ export default function TimetablePage() {
           {/* ── Main content ── */}
           {!loading && !error && timeslots.length > 0 && (
             viewMode === "grid" ? (
-              /* ─── GRID ─── */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+              /* ─── GRID ───
+               * Mobile:  1 col (full width, day headers + cards stack vertically)
+               * sm:      2 col
+               * lg:      3 col
+               * xl:      4 col
+               * 2xl:     5 col
+               */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                 {visibleDays.map((day) => {
                   const daySlots = slotsByDay(day);
                   const cfg      = DAY_CONFIG[day];
@@ -414,7 +429,7 @@ export default function TimetablePage() {
 
                       {/* Slot cards or empty */}
                       {daySlots.length === 0 ? (
-                        <div className="flex items-center justify-center py-6 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 text-muted-foreground">
+                        <div className="flex items-center justify-center py-5 sm:py-6 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 text-muted-foreground">
                           <span className="text-xs">No classes</span>
                         </div>
                       ) : (
@@ -443,7 +458,7 @@ export default function TimetablePage() {
                     const cfg = DAY_CONFIG[day];
                     return (
                       <div key={day}>
-                        <div className={cn("flex items-center gap-2 px-4 py-2.5", cfg.bg)}>
+                        <div className={cn("flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5", cfg.bg)}>
                           <span className={cn("h-2 w-2 rounded-full shrink-0", cfg.dot)} />
                           <span className={cn("text-xs font-bold uppercase tracking-wider", cfg.accent)}>
                             {day}
@@ -453,7 +468,7 @@ export default function TimetablePage() {
                             {daySlots.length} period{daySlots.length > 1 ? "s" : ""}
                           </span>
                         </div>
-                        <div className="px-2 py-1 space-y-0.5">
+                        <div className="px-1 sm:px-2 py-1 space-y-0.5">
                           {daySlots.map((slot, i) => (
                             <SlotRow
                               key={`${slot.day}-${slot.start_time}-${i}`}
@@ -473,60 +488,100 @@ export default function TimetablePage() {
         </div>
       </main>
 
-      {/* ── Detail Sheet ── */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-[360px] sm:w-[400px]">
-          {selectedSlot && (() => {
-            const cfg = DAY_CONFIG[selectedSlot.day] ?? DAY_CONFIG["Monday"];
-            return (
-              <>
-                <SheetHeader className="pb-4">
-                  <div className={cn(
-                    "inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2",
-                    cfg.badge
-                  )}>
-                    <span className={cn("h-2 w-2 rounded-full", cfg.dot)} />
-                    {selectedSlot.day}
-                  </div>
-                  <SheetTitle className="text-xl">Period Details</SheetTitle>
-                  <SheetDescription>Full information for this time slot</SheetDescription>
-                </SheetHeader>
-
-                <div className="space-y-4 mt-2">
-                  {[
-                    {
-                      label: "Time",
-                      icon:  <Clock className="h-4 w-4" />,
-                      value: `${selectedSlot.start_time} – ${selectedSlot.end_time}`,
-                    },
-                    {
-                      label: "Classroom",
-                      icon:  <DoorOpen className="h-4 w-4" />,
-                      value: <ClassroomName id={selectedSlot.classroom_id} />,
-                    },
-                    ...(selectedSlot.roomno
-                      ? [{ label: "Room No.", icon: <DoorOpen    className="h-4 w-4" />, value: selectedSlot.roomno }]
-                      : []),
-                    ...(selectedSlot.date
-                      ? [{ label: "Date",     icon: <CalendarDays className="h-4 w-4" />, value: selectedSlot.date }]
-                      : []),
-                  ].map(({ label, icon, value }) => (
-                    <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                      <div className="p-1.5 rounded-md bg-background shadow-sm text-muted-foreground">
-                        {icon}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
-                        <p className="text-sm font-semibold text-foreground">{value}</p>
-                      </div>
-                    </div>
-                  ))}
+      {/* ── Detail Sheet ──
+       * Mobile:  full-width bottom sheet (side="bottom") for better thumb reach
+       * sm+:     right-side panel
+       * We detect screen size and swap the `side` prop accordingly.
+       */}
+      <ResponsiveSheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        {selectedSlot && (() => {
+          const cfg = DAY_CONFIG[selectedSlot.day] ?? DAY_CONFIG["Monday"];
+          return (
+            <>
+              <SheetHeader className="pb-3 sm:pb-4">
+                <div className={cn(
+                  "inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2",
+                  cfg.badge
+                )}>
+                  <span className={cn("h-2 w-2 rounded-full", cfg.dot)} />
+                  {selectedSlot.day}
                 </div>
-              </>
-            );
-          })()}
-        </SheetContent>
-      </Sheet>
+                <SheetTitle className="text-lg sm:text-xl">Period Details</SheetTitle>
+                <SheetDescription>Full information for this time slot</SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-3 sm:space-y-4 mt-2">
+                {[
+                  {
+                    label: "Time",
+                    icon:  <Clock className="h-4 w-4" />,
+                    value: `${selectedSlot.start_time} – ${selectedSlot.end_time}`,
+                  },
+                  {
+                    label: "Classroom",
+                    icon:  <DoorOpen className="h-4 w-4" />,
+                    value: <ClassroomName id={selectedSlot.classroom_id} />,
+                  },
+                  ...(selectedSlot.roomno
+                    ? [{ label: "Room No.", icon: <DoorOpen    className="h-4 w-4" />, value: selectedSlot.roomno }]
+                    : []),
+                  ...(selectedSlot.date
+                    ? [{ label: "Date",     icon: <CalendarDays className="h-4 w-4" />, value: selectedSlot.date }]
+                    : []),
+                ].map(({ label, icon, value }) => (
+                  <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="p-1.5 rounded-md bg-background shadow-sm text-muted-foreground">
+                      {icon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
+                      <p className="text-sm font-semibold text-foreground">{value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          );
+        })()}
+      </ResponsiveSheet>
     </div>
+  );
+}
+
+// ─── Responsive Sheet helper ──────────────────────────────────────────────────
+// Uses "bottom" on mobile (≤640px) and "right" on larger screens.
+
+function ResponsiveSheet({
+  open,
+  onOpenChange,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
+        className={cn(
+          isMobile
+            ? "rounded-t-2xl max-h-[85vh] overflow-y-auto pb-safe"
+            : "w-[360px] sm:w-[400px]"
+        )}
+      >
+        {children}
+      </SheetContent>
+    </Sheet>
   );
 }
