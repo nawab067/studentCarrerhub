@@ -259,11 +259,143 @@ export default function StudentAssignmentsPage() {
           opacity: 0.25; margin-bottom: 32px;
         }
         .ghost-card { height: 130px; background: #dde2ec; border-radius: 12px; }
+
+        /* ── RESPONSIVE: main layout ── */
+        .main-content {
+          transition: margin-left 0.3s;
+        }
+
+        /* Header layout */
+        .header-title-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 24px 32px 16px;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .header-filter-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 0 32px 16px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .header-filter-row::-webkit-scrollbar { display: none; }
+
+        .stats-strip {
+          display: flex;
+          background: #fff;
+          border: 1px solid #e8ecf4;
+          border-radius: 12px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        .cards-grid {
+          display: grid;
+          gap: 16px;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .content-padding {
+          padding: 28px 32px;
+        }
+
+        /* ── MOBILE breakpoint (≤ 640px) ── */
+        @media (max-width: 640px) {
+          .main-content {
+            margin-left: 0 !important;
+          }
+
+          .header-title-row {
+            padding: 16px 16px 12px;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .header-filter-row {
+            padding: 0 16px 12px;
+            gap: 6px;
+          }
+
+          .filter-pill {
+            padding: 5px 10px;
+            font-size: 12px;
+          }
+
+          .stats-strip {
+            width: 100%;
+          }
+
+          .stat-chip {
+            flex: 1;
+            padding: 8px 10px;
+          }
+
+          .search-wrap {
+            max-width: 100%;
+            width: 100%;
+          }
+
+          .cards-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .content-padding {
+            padding: 16px 12px;
+          }
+
+          .header-title-row h1 {
+            font-size: 18px !important;
+          }
+        }
+
+        /* ── TABLET breakpoint (641px – 1024px) ── */
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .main-content {
+            margin-left: 0 !important;
+          }
+
+          .header-title-row {
+            padding: 20px 20px 14px;
+          }
+
+          .header-filter-row {
+            padding: 0 20px 14px;
+          }
+
+          .cards-grid {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          }
+
+          .content-padding {
+            padding: 20px 20px;
+          }
+
+          .search-wrap {
+            max-width: 240px;
+          }
+        }
+
+        /* Sidebar offset only on large screens */
+        @media (min-width: 1025px) {
+          .main-content.sidebar-expanded {
+            margin-left: 256px;
+          }
+          .main-content.sidebar-collapsed {
+            margin-left: 80px;
+          }
+        }
       `}</style>
 
       <StudentPortalSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      <main className={`transition-all duration-300 min-h-screen ${collapsed ? 'ml-20' : 'ml-64'}`}>
+      <main
+        className={`main-content min-h-screen ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}
+      >
 
         {/* ══════════ STICKY HEADER ══════════ */}
         <div
@@ -275,7 +407,7 @@ export default function StudentAssignmentsPage() {
           }}
         >
           {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px 16px' }}>
+          <div className="header-title-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12, flexShrink: 0,
@@ -307,10 +439,7 @@ export default function StudentAssignmentsPage() {
 
             {/* Stats strip */}
             {!loading && assessments.length > 0 && (
-              <div style={{
-                display: 'flex', background: '#fff',
-                border: '1px solid #e8ecf4', borderRadius: 12, overflow: 'hidden',
-              }}>
+              <div className="stats-strip">
                 {([
                   { label: 'Overdue',  value: counts.overdue,  color: '#e11d48' },
                   { label: 'Due Soon', value: counts.soon,     color: '#d97706' },
@@ -330,7 +459,7 @@ export default function StudentAssignmentsPage() {
           </div>
 
           {/* Filter + Search row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 32px 16px', overflowX: 'auto' }}>
+          <div className="header-filter-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
               {([
                 { key: 'all' as FilterType,      label: 'All',      count: counts.all },
@@ -362,11 +491,11 @@ export default function StudentAssignmentsPage() {
         </div>
 
         {/* ══════════ CONTENT ══════════ */}
-        <div className="page-bg" style={{ padding: '28px 32px', minHeight: 'calc(100vh - 160px)' }}>
+        <div className="page-bg content-padding" style={{ minHeight: 'calc(100vh - 160px)' }}>
 
           {/* Skeletons */}
           {loading && (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))' }}>
+            <div className="cards-grid">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="skel" style={{ height: 210 }} />
               ))}
@@ -375,7 +504,7 @@ export default function StudentAssignmentsPage() {
 
           {/* Cards */}
           {!loading && filtered.length > 0 && (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))' }}>
+            <div className="cards-grid">
               {filtered.map((assessment, i) => {
                 const status = getDueStatus(assessment.dueDate);
                 const sc = statusConfig[status];
