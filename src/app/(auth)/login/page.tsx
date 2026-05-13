@@ -1,21 +1,42 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+
 import { LoginForm } from "@/components/login-form";
+import Cookies from "js-cookie";
+
+interface UserState {
+  email: string;
+  password: string;
+}
 
 export default function LoginPage() {
-  const [users, setUsers] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [buttonDisabled, setButtonDisabled] = useState(true);
+
   const router = useRouter();
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const [users, setUsers] = useState<UserState>({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const [buttonDisabled, setButtonDisabled] =
+    useState(true);
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL;
+
+  // =========================
+  // LOGIN FUNCTION
+  // =========================
 
   async function handleLogin() {
-    console.log("Base URL:", baseUrl);
+
     try {
+
       setLoading(true);
 
       const response = await axios.post(
@@ -24,67 +45,212 @@ export default function LoginPage() {
           email: users.email,
           password: users.password,
         },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+        }
       );
 
-      const user = response.data.user;
+      // =========================
+      // BACKEND RESPONSE
+      // =========================
 
-      console.log("Login response name:", user);
+      const {
+        access_token,
+        user,
+      } = response.data;
+
+      // =========================
+      // CHECK USER
+      // =========================
 
       if (!user) {
-        alert("Invalid login credentials");
+
+        alert("Invalid credentials");
+
         return;
       }
 
-      if (user.role === "TEACHER") {
-       
-        localStorage.setItem("teacherId", String(user._id));
-        localStorage.setItem("userEmail", user.email);
+      // =========================
+      // STORE TOKEN
+      // =========================
 
-        router.push(`/teacherportal/dashboard/${user._id}`);
-      }
+      localStorage.setItem(
+        "token",
+        access_token
+      );
+
+      localStorage.setItem(
+        "userEmail",
+        user.email
+      );
+
+      localStorage.setItem(
+        "userRole",
+        user.role
+      );
+
+      // =========================
+      // ROLE BASED LOGIN
+      // =========================
 
       if (user.role === "ADMIN") {
-        localStorage.setItem("adminId", user._id); 
-        localStorage.setItem("userEmail", user.email);
+
+        localStorage.setItem(
+          "token",
+          access_token
+        );
+
+        Cookies.set(
+          "token",
+          access_token,
+          {
+            expires: 1,
+          }
+        );
+
+        localStorage.setItem(
+          "adminId",
+          user._id
+        );
+
+        localStorage.setItem(
+          "userRole",
+          user.role
+        );
+
         router.push("/admin/dashboard");
       }
-      if (user.role === "STUDENT") {
-        localStorage.setItem("studentId", String(user._id));
-        localStorage.setItem("userEmail", user.email);
-        router.push("/studentPortal/dashboard");
+
+      else if (
+        user.role === "TEACHER"
+      ) {
+
+        localStorage.setItem(
+          "teacherId",
+          user._id
+        );
+
+        router.push(
+          `/teacherportal/dashboard/${user._id}`
+        );
       }
 
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Please try again.");
+      else if (
+        user.role === "STUDENT"
+      ) {
+
+        localStorage.setItem(
+          "studentId",
+          user._id
+        );
+
+        router.push(
+          "/studentPortal/dashboard"
+        );
+      }
+
+    } catch (error: any) {
+
+      console.error(
+        "Login Error:",
+        error
+      );
+
+      if (
+        error.response?.data?.detail
+      ) {
+
+        alert(
+          error.response.data.detail
+        );
+
+      } else {
+
+        alert(
+          "Login failed. Please try again."
+        );
+      }
+
     } finally {
+
       setLoading(false);
     }
   }
 
+  // =========================
+  // BUTTON VALIDATION
+  // =========================
+
   useEffect(() => {
-    setButtonDisabled(!(users.email && users.password));
+
+    setButtonDisabled(
+      !users.email ||
+      !users.password
+    );
+
   }, [users]);
 
+  // =========================
+  // UI
+  // =========================
+
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+
+    <div
+      className="
+      flex
+      min-h-screen
+      items-center
+      justify-center
+      p-6
+      "
+    >
+
+      <div
+        className="
+        w-full
+        max-w-sm
+        "
+      >
+
         <LoginForm
+
           email={users.email}
+
           password={users.password}
+
           onLogin={handleLogin}
+
           isLoading={loading}
-          isButtonDisabled={buttonDisabled}
+
+          isButtonDisabled={
+            buttonDisabled
+          }
+
           onChangeEmail={(e) =>
-            setUsers({ ...users, email: e.target.value })
+            setUsers({
+              ...users,
+              email: e.target.value,
+            })
           }
+
           onChangePassword={(e) =>
-            setUsers({ ...users, password: e.target.value })
+            setUsers({
+              ...users,
+              password: e.target.value,
+            })
           }
-          onSignUp={() => router.push("/register")}
+
+          onSignUp={() =>
+            router.push("/register")
+          }
         />
+
       </div>
+
     </div>
   );
 }
