@@ -77,7 +77,7 @@ Cookies.set(
   "token",
   access_token,
   {
-    expires: 1 / 1440,
+    expires: 1/24, // 1 hour
   }
 );
 
