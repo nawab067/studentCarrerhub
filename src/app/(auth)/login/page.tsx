@@ -29,9 +29,7 @@ export default function LoginPage() {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL;
 
-  // =========================
-  // LOGIN FUNCTION
-  // =========================
+
 
   async function handleLogin() {
 
@@ -53,18 +51,13 @@ export default function LoginPage() {
         }
       );
 
-      // =========================
-      // BACKEND RESPONSE
-      // =========================
 
       const {
         access_token,
         user,
       } = response.data;
 
-      // =========================
-      // CHECK USER
-      // =========================
+     
 
       if (!user) {
 
@@ -73,84 +66,70 @@ export default function LoginPage() {
         return;
       }
 
-      // =========================
-      // STORE TOKEN
-      // =========================
+      
 
-      localStorage.setItem(
-        "token",
-        access_token
-      );
+localStorage.setItem(
+  "token",
+  access_token
+);
 
-      localStorage.setItem(
-        "userEmail",
-        user.email
-      );
+Cookies.set(
+  "token",
+  access_token,
+  {
+    expires: 1 / 1440,
+  }
+);
 
-      localStorage.setItem(
-        "userRole",
-        user.role
-      );
+localStorage.setItem(
+  "userEmail",
+  user.email
+);
 
-      // =========================
-      // ROLE BASED LOGIN
-      // =========================
+localStorage.setItem(
+  "userRole",
+  user.role
+);
 
-      if (user.role === "ADMIN") {
 
-        localStorage.setItem(
-          "token",
-          access_token
-        );
 
-        Cookies.set(
-          "token",
-          access_token,
-          {
-            expires: 1,
-          }
-        );
+if (user.role === "ADMIN") {
 
-        localStorage.setItem(
-          "adminId",
-          user._id
-        );
+  localStorage.setItem(
+    "adminId",
+    user._id
+  );
 
-        localStorage.setItem(
-          "userRole",
-          user.role
-        );
+  router.push("/admin/dashboard");
+}
 
-        router.push("/admin/dashboard");
-      }
+else if (
+  user.role === "TEACHER"
+) {
 
-      else if (
-        user.role === "TEACHER"
-      ) {
+  localStorage.setItem(
+    "teacherId",
+    user._id
+  );
 
-        localStorage.setItem(
-          "teacherId",
-          user._id
-        );
+  router.push(
+    `/teacherportal/dashboard/${user._id}`
+  );
+}
 
-        router.push(
-          `/teacherportal/dashboard/${user._id}`
-        );
-      }
+else if (
+  user.role === "STUDENT"
+) {
 
-      else if (
-        user.role === "STUDENT"
-      ) {
+  localStorage.setItem(
+    "studentId",
+    user._id
+  );
 
-        localStorage.setItem(
-          "studentId",
-          user._id
-        );
-
-        router.push(
-          "/studentPortal/dashboard"
-        );
-      }
+  router.push(
+    "/studentPortal/dashboard"
+  );
+}
 
     } catch (error: any) {
 
@@ -180,9 +159,7 @@ export default function LoginPage() {
     }
   }
 
-  // =========================
-  // BUTTON VALIDATION
-  // =========================
+
 
   useEffect(() => {
 
@@ -193,9 +170,7 @@ export default function LoginPage() {
 
   }, [users]);
 
-  // =========================
-  // UI
-  // =========================
+
 
   return (
 
