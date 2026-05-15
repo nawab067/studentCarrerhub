@@ -1,7 +1,9 @@
 'use client'
 
 import StudentDialog from '@/components/teacher-portal/add-assesment'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { Bell } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import axios from 'axios'
 import TeacherPortalSidebar from '@/components/teacher-portal/teacherportal-sidebar'
 import {
@@ -18,6 +20,7 @@ import {
   ArrowUpRight,
   Search,
   Layers,
+  CheckCheck,
 } from 'lucide-react'
 import {
   Dialog,
@@ -41,6 +44,13 @@ export interface Assessment {
   description: string
   classId: string
   created_at: string
+}
+
+export interface Notification {
+  _id: string
+  message: string
+  teacher_id: string
+  is_read: boolean
 }
 
 const formatDate = (date: string) =>
@@ -79,8 +89,22 @@ export default function TeacherClassesPage() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [search, setSearch] = useState('')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [openNotif, setOpenNotif] = useState(false)
+  const notifRef = useRef<HTMLDivElement>(null)
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setOpenNotif(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     const id = localStorage.getItem('teacherId')
@@ -108,6 +132,19 @@ export default function TeacherClassesPage() {
     } catch { setError('Failed to refresh assessments.') }
   }
 
+  useEffect(() => {
+    if (!teacherId) return
+    const fetchNotifications = async () => {
+      try {
+        const res = await axios.get(`${baseUrl}/notifications/teacher/${teacherId}`)
+        setNotifications(res.data || [])
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    fetchNotifications()
+  }, [teacherId])
+
   const handleManageAssessments = (cls: AssignedClass, idx: number) => {
     setActiveClassId(cls._id)
     setActiveClassName(cls.classroom_name)
@@ -128,6 +165,8 @@ export default function TeacherClassesPage() {
       setAssessments((prev) => prev.filter((a) => a._id !== assessmentId))
     } catch { setError('Failed to delete assessment.') }
   }
+
+  const unreadCount = notifications.filter(n => !n.is_read).length
 
   const getClassSize = (count: number): FilterType =>
     count <= 15 ? 'small' : count <= 30 ? 'medium' : 'large'
@@ -237,6 +276,44 @@ export default function TeacherClassesPage() {
         .cards-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
         .content-padding { padding: 28px 32px; }
 
+        /* ── Notification dropdown ── */
+        .notif-btn {
+          position: relative; width: 38px; height: 38px; border-radius: 10px; border: 1px solid #e2e8f0;
+          background: #fff; display: flex; align-items: center; justify-content: center;
+          cursor: pointer; transition: background 0.15s, border-color 0.15s; flex-shrink: 0;
+        }
+        .notif-btn:hover { background: #f8faff; border-color: #c7d2fe; }
+        .notif-badge {
+          position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px;
+          background: #ef4444; color: #fff; font-size: 10px; font-weight: 700;
+          border-radius: 999px; display: flex; align-items: center; justify-content: center;
+          padding: 0 4px; border: 2px solid rgba(244,246,251,0.93); font-family: 'DM Mono', monospace;
+          line-height: 1;
+        }
+        @keyframes dropIn { from { opacity:0; transform:translateY(-8px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+        .notif-dropdown {
+          position: absolute; top: calc(100% + 10px); right: 0; width: 320px;
+          background: #fff; border: 1px solid #e8ecf4; border-radius: 16px;
+          box-shadow: 0 20px 60px rgba(15,23,42,.13), 0 4px 16px rgba(15,23,42,.07);
+          z-index: 100; overflow: hidden; animation: dropIn 0.2s cubic-bezier(.22,.68,0,1.1);
+        }
+        .notif-header {
+          padding: 14px 16px 10px; border-bottom: 1px solid #f1f5f9;
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .notif-item {
+          display: flex; align-items: flex-start; gap: 10; padding: 12px 16px;
+          border-bottom: 1px solid #f8fafc; transition: background 0.14s;
+          cursor: default;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: #f8faff; }
+        .notif-dot {
+          width: 8px; height: 8px; border-radius: 50%; background: #6366f1;
+          flex-shrink: 0; margin-top: 5px;
+        }
+        .notif-empty { padding: 36px 16px; text-align: center; }
+
         @media (max-width: 640px) {
           .main-content { margin-left: 0 !important; }
           .header-title-row { padding: 16px 16px 12px; flex-direction: column; align-items: flex-start; }
@@ -248,6 +325,7 @@ export default function TeacherClassesPage() {
           .cards-grid { grid-template-columns: 1fr; }
           .content-padding { padding: 16px 12px; }
           .header-title-row h1 { font-size: 18px !important; }
+          .notif-dropdown { width: 280px; right: -8px; }
         }
         @media (min-width: 641px) and (max-width: 1024px) {
           .main-content { margin-left: 0 !important; }
@@ -271,6 +349,7 @@ export default function TeacherClassesPage() {
         <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(244,246,251,0.93)', backdropFilter: 'blur(14px)', borderBottom: '1px solid #e2e8f0' }}>
 
           <div className="header-title-row">
+            {/* Left: Icon + Title */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: 'linear-gradient(135deg,#3730a3 0%,#6366f1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 20px rgba(99,102,241,.28)' }}>
                 <ClipboardList style={{ width: 20, height: 20, color: '#fff' }} />
@@ -292,29 +371,104 @@ export default function TeacherClassesPage() {
               </div>
             </div>
 
-            {!loading && assignedClasses.length > 0 && (
-              <div className="stats-strip">
-                {([
-                  { label: 'Classes',   value: assignedClasses.length, color: '#4f46e5' },
-                  { label: 'Students',  value: totalStudents,           color: '#7c3aed' },
-                  { label: 'Avg / Class', value: assignedClasses.length ? Math.round(totalStudents / assignedClasses.length) : 0, color: '#8b5cf6' },
-                ] as const).map(s => (
-                  <div key={s.label} className="stat-chip">
-                    <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }}>{s.value}</span>
-                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{s.label}</span>
+            {/* Right: Stats strip + Bell */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {!loading && assignedClasses.length > 0 && (
+                <div className="stats-strip">
+                  {([
+                    { label: 'Classes',     value: assignedClasses.length, color: '#4f46e5' },
+                    { label: 'Students',    value: totalStudents,           color: '#7c3aed' },
+                    { label: 'Avg / Class', value: assignedClasses.length ? Math.round(totalStudents / assignedClasses.length) : 0, color: '#8b5cf6' },
+                  ] as const).map(s => (
+                    <div key={s.label} className="stat-chip">
+                      <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: "'DM Mono',monospace", lineHeight: 1 }}>{s.value}</span>
+                      <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── NOTIFICATION BELL (fixed position in header) ── */}
+              <div ref={notifRef} style={{ position: 'relative' }}>
+                <button className="notif-btn" onClick={() => setOpenNotif(prev => !prev)} aria-label="Notifications">
+                  <Bell style={{ width: 17, height: 17, color: '#475569' }} />
+                  {unreadCount > 0 && (
+                    <span className="notif-badge">{unreadCount}</span>
+                  )}
+                </button>
+
+                {openNotif && (
+                  <div className="notif-dropdown">
+                    {/* Dropdown header */}
+                    <div className="notif-header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Bell style={{ width: 14, height: 14, color: '#6366f1' }} />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Notifications</span>
+                        {unreadCount > 0 && (
+                          <span style={{ fontSize: 10, fontFamily: "'DM Mono',monospace", fontWeight: 600, background: '#eef2ff', color: '#4f46e5', padding: '2px 7px', borderRadius: 999 }}>
+                            {unreadCount} new
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setOpenNotif(false)}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 6 }}
+                      >
+                        <X style={{ width: 13, height: 13 }} />
+                      </button>
+                    </div>
+
+                    {/* Notification list */}
+                    {notifications.length === 0 ? (
+                      <div className="notif-empty">
+                        <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
+                          <CheckCheck style={{ width: 18, height: 18, color: '#94a3b8' }} />
+                        </div>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', marginBottom: 4 }}>All caught up!</p>
+                        <p style={{ fontSize: 12, color: '#94a3b8' }}>No notifications yet.</p>
+                      </div>
+                    ) : (
+                      <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                        {notifications.map((notif) => (
+                          <div key={notif._id} className="notif-item" style={{ gap: 10 }}>
+                            {/* Unread indicator */}
+                            <div style={{ paddingTop: 4, flexShrink: 0 }}>
+                              {!notif.is_read ? (
+                                <div className="notif-dot" />
+                              ) : (
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#e2e8f0', flexShrink: 0 }} />
+                              )}
+                            </div>
+
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 13, color: notif.is_read ? '#64748b' : '#0f172a', fontWeight: notif.is_read ? 400 : 600, lineHeight: 1.45, marginBottom: 0 }}>
+                                {notif.message}
+                              </p>
+                              {!notif.is_read && (
+                                <span style={{ display: 'inline-block', marginTop: 4, fontSize: 10, fontWeight: 600, color: '#6366f1', background: '#eef2ff', padding: '2px 7px', borderRadius: 999, fontFamily: "'DM Mono',monospace" }}>
+                                  New
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
               </div>
-            )}
+              {/* ── END BELL ── */}
+            </div>
           </div>
 
+          {/* Filter row */}
           <div className="header-filter-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
               {([
-                { key: 'all'    as FilterType, label: 'All Classes',  count: counts.all },
+                { key: 'all'    as FilterType, label: 'All Classes',   count: counts.all },
                 { key: 'small'  as FilterType, label: '≤ 15 Students', count: counts.small },
-                { key: 'medium' as FilterType, label: '16 – 30',       count: counts.medium },
-                { key: 'large'  as FilterType, label: '30 +',          count: counts.large },
+                { key: 'medium' as FilterType, label: '16 – 30',        count: counts.medium },
+                { key: 'large'  as FilterType, label: '30 +',           count: counts.large },
               ]).map(f => (
                 <button key={f.key} className={`filter-pill${filter === f.key ? ' active' : ''}`} style={{ color: filter === f.key ? '#fff' : '#475569' }} onClick={() => setFilter(f.key)}>
                   {f.label}
