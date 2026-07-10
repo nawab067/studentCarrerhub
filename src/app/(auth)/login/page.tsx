@@ -6,15 +6,7 @@ import axios from "axios";
 
 import { LoginForm } from "@/components/login-form";
 import Cookies from "js-cookie";
-import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Login",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 interface UserState {
   email: string;
