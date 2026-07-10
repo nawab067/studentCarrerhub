@@ -7,3 +7,11 @@ export const metadata: Metadata = {
     follow: false,
   },
 };
+
+export default function TeacherPortalLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <>{children}</>;
+}
