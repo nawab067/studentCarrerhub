@@ -16,25 +16,42 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://student-carrerhub.vercel.app"),
 
+  applicationName: "Student Career Hub",
+
   title: {
     default: "Student Career Hub",
     template: "%s | Student Career Hub",
   },
 
   description:
-    "Student Career Hub helps students discover internships, jobs, career guidance, resume tips, interview preparation, and professional growth resources.",
+    "Student Career Hub is a modern Student ERP System that helps schools, colleges, and universities manage students, teachers, classrooms, attendance, timetables, and academic records.",
 
   keywords: [
-    "Student Career Hub",
-    "Student Jobs",
-    "Internships",
-    "Career Guidance",
-    "Resume Builder",
-    "Interview Preparation",
-    "Fresh Graduate Jobs",
-    "Pakistan Jobs",
-    "Career Development",
+    "Student ERP",
+    "School Management System",
+    "College Management System",
+    "University ERP",
+    "Student Information System",
+    "Education ERP",
+    "Student Portal",
+    "Teacher Portal",
+    "Admin Portal",
+    "Student Management",
+    "Teacher Management",
+    "Attendance Management",
+    "Classroom Management",
+    "Class Timetable",
+    "Academic Management",
+    "Educational Software",
+    "Student Career Hub"
   ],
+
+  category: "Education",
+
+  robots: {
+    index: true,
+    follow: true,
+  },
 
   authors: [
     {
@@ -45,29 +62,22 @@ export const metadata: Metadata = {
   creator: "Nawab Haider",
 
   openGraph: {
-    title: "Student Career Hub",
+    title: "Student Career Hub | Student ERP System",
     description:
-      "Find internships, jobs, resume tips, interview preparation and career guidance.",
-
+      "Manage students, teachers, classrooms, attendance, timetables, and academic records.",
     url: "https://student-carrerhub.vercel.app",
-
     siteName: "Student Career Hub",
-
     locale: "en_US",
-
     type: "website",
   },
 
   twitter: {
     card: "summary_large_image",
-
-    title: "Student Career Hub",
-
+    title: "Student Career Hub | Student ERP",
     description:
-      "Find internships, jobs and career guidance for students.",
+      "A complete Student ERP solution for schools, colleges, and universities.",
   },
 };
-
 export default function RootLayout({
   children,
 }: {
